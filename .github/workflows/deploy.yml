@@ -1,0 +1,131 @@
+name: CI/CD Solicitud Permisos
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # Build
+  build:
+    name: Build
+    runs-on: [self-hosted, Linux, X64]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install Dependencies (Root)
+        run: npm install
+        
+      - name: Install Dependencies (Server)
+        run: |
+          cd server
+          npm install
+      
+      - name: Build Server
+        run: |
+          cd server
+          npm run build
+          
+      - name: Build Next.js
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: npm run build
+  
+  # Deploy
+  deploy:
+    name: Deploy
+    runs-on: [self-hosted, Linux, X64]
+    needs: [build]
+    
+    steps:
+      - name: Verificar y clonar repositorio
+        run: |
+          REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          DEPLOY_PATH="/var/www/operaciones/Mi_Programacion_Solicitud_de_permisos"
+          
+          if [ -d "$DEPLOY_PATH/.git" ]; then
+            echo "Repositorio existe, actualizando..."
+            cd "$DEPLOY_PATH"
+            git remote set-url origin "$REPO_URL"
+            git fetch origin main
+            git reset --hard origin/main
+          else
+            echo "Repositorio no existe, clonando..."
+            mkdir -p /var/www/operaciones
+            cd /var/www/operaciones
+            if [ -d "Mi_Programacion_Solicitud_de_permisos" ]; then
+              rm -rf Mi_Programacion_Solicitud_de_permisos
+            fi
+            git clone "$REPO_URL" Mi_Programacion_Solicitud_de_permisos
+            cd Mi_Programacion_Solicitud_de_permisos
+            git checkout main
+          fi
+      
+      - name: Crear archivo .env (Raiz)
+        working-directory: /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos
+        run: |
+          touch .env
+          echo "UPLOAD_DIR=${{ secrets.UPLOAD_DIR }}" >> .env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
+      
+      - name: Crear archivo .env (Server)
+        working-directory: /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos/server
+        run: |
+          touch .env
+          echo "ALLOWED_FILE_TYPES='${{ secrets.ALLOWED_FILE_TYPES }}'" >> .env
+          echo "CORS_ORIGIN='${{ secrets.CORS_ORIGIN }}'" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "MAX_FILE_SIZE=${{ secrets.MAX_FILE_SIZE }}" >> .env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "SQL_SERVER_DATABASE=${{ secrets.SQL_SERVER_DATABASE }}" >> .env
+          echo "SQL_SERVER_HOST=${{ secrets.SQL_SERVER_HOST }}" >> .env
+          echo "SQL_SERVER_PASSWORD=${{ secrets.SQL_SERVER_PASSWORD }}" >> .env
+          echo "SQL_SERVER_PORT=${{ secrets.SQL_SERVER_PORT }}" >> .env
+          echo "SQL_SERVER_USER=${{ secrets.SQL_SERVER_USER }}" >> .env
+      
+      - name: Instalar dependencias
+        run: |
+          cd /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos
+          npm install
+          cd server
+          npm install
+      
+      - name: Build de aplicaciones
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: |
+          cd /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos
+          npm run build
+          cd server
+          npm run build
+      
+      - name: Reiniciar con PM2 (Backend)
+        working-directory: /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos/server
+        run: |
+          pm2 delete solicitud_permisos_back || true
+          npm run build
+          pm2 start npm --name "solicitud_permisos_back" -- start
+      
+      - name: Reiniciar con PM2 (Frontend)
+        working-directory: /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos
+        run: |
+          pm2 delete solicitud_permisos_front || true
+          pm2 start npm --name "solicitud_permisos_front" -- start
+          pm2 save
+      
+      - name: Deploy completado
+        run: echo "Deploy exitoso - Aplicaciones corriendo con PM2"
