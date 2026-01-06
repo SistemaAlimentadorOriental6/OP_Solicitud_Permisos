@@ -21,12 +21,12 @@ jobs:
           node-version: '20'
       
       - name: Install Dependencies (Root)
-        run: npm install
+        run: npm i --legacy-peer-deps
         
       - name: Install Dependencies (Server)
         run: |
           cd server
-          npm install
+          npm i --legacy-peer-deps
       
       - name: Build Server
         run: |
@@ -100,9 +100,9 @@ jobs:
       - name: Instalar dependencias
         run: |
           cd /var/www/operaciones/Mi_Programacion_Solicitud_de_permisos
-          npm install
+          npm i --legacy-peer-deps
           cd server
-          npm install
+          npm i --legacy-peer-deps
       
       - name: Build de aplicaciones
         env:
