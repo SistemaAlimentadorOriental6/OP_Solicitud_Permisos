@@ -37,7 +37,7 @@ export async function getUserPermits(): Promise<UserPermit[]> {
 /**
  * Verifica si existen permisos para las fechas y tipo de novedad especificados
  */
-export async function checkExistingPermits(dates: string[], noveltyType: string): Promise<boolean> {
+export async function checkExistingPermits(dates: string[], noveltyType: string, userCode?: string): Promise<boolean> {
     try {
         const token = localStorage.getItem("accessToken")
         if (!token) {
@@ -50,7 +50,7 @@ export async function checkExistingPermits(dates: string[], noveltyType: string)
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ dates, noveltyType }),
+            body: JSON.stringify({ dates, noveltyType, userCode }),
         })
 
         if (!response.ok) {

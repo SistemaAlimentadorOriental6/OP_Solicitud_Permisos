@@ -138,7 +138,7 @@ const PersonModalComponent = memo(({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-emerald-500 to-green-600 p-6 rounded-t-3xl">
+            <div className="sticky top-0 bg-[#4cc253] p-6 rounded-t-3xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white/20">
@@ -214,7 +214,7 @@ const PersonModalComponent = memo(({
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-8"
+                  className="bg-gray-50 border border-gray-200 rounded-2xl p-8"
                 >
                   <div className="text-center mb-6">
                     <motion.div
@@ -227,17 +227,17 @@ const PersonModalComponent = memo(({
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
-                      className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                      className="w-20 h-20 bg-[#4cc253] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#4cc253]/20"
                     >
                       <Search className="h-10 w-10 text-white" />
                     </motion.div>
-                    <h3 className="text-2xl font-bold text-emerald-800 mb-2">Buscar Persona</h3>
-                    <p className="text-emerald-600">Ingrese la cédula para buscar en la base de datos</p>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Buscar Persona</h3>
+                    <p className="text-gray-600">Ingrese la cédula para buscar en la base de datos</p>
                   </div>
 
                   <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-emerald-700 mb-2">
+                      <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">
                         Número de Cédula
                       </label>
                       <input
@@ -253,7 +253,7 @@ const PersonModalComponent = memo(({
                           }
                         }}
                         placeholder="Ej: 98765432"
-                        className="w-full p-4 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-colors text-lg"
+                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#4cc253]/20 focus:border-[#4cc253] outline-none transition-all text-lg"
                         disabled={isSearchingCedula}
                         autoComplete="off"
                       />
@@ -274,7 +274,7 @@ const PersonModalComponent = memo(({
                       type="button"
                       onClick={handleSearchByCedula}
                       disabled={isSearchingCedula || !cedulaSearch.trim()}
-                      className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+                      className="w-full py-4 bg-[#4cc253] text-white rounded-xl hover:bg-[#3da343] transition-all font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3 shadow-lg shadow-[#4cc253]/20"
                     >
                       {isSearchingCedula ? (
                         <>
@@ -304,12 +304,12 @@ const PersonModalComponent = memo(({
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-6"
+                      className="bg-gray-50 border border-gray-200 rounded-2xl p-6"
                     >
                       <div className="flex items-start space-x-6">
                         {/* Foto del empleado */}
                         <div className="flex-shrink-0">
-                          <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg ring-4 ring-emerald-200">
+                          <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg ring-2 ring-white">
                             <UserAvatar
                               cedula={operatorInfo.cedula || ''}
                               alt={operatorInfo.nombre || 'Empleado'}
@@ -322,7 +322,7 @@ const PersonModalComponent = memo(({
                         {/* Información del empleado */}
                         <div className="flex-1 space-y-4">
                           <div>
-                            <h3 className="text-xl font-bold text-emerald-800 mb-2">Información del Empleado</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Información del Empleado</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                               <div>
                                 <span className="font-medium text-emerald-700">Nombre:</span>
@@ -513,96 +513,49 @@ const PersonCard = memo(({ person, index, onSelect }: {
   }, [person, onSelect]);
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.8, y: 50 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.8, y: -50 }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.05,
-        type: "spring",
-        stiffness: 120,
-        damping: 20
-      }}
-      whileHover={{
-        scale: 1.02,
-        y: -8,
-        boxShadow: "0 20px 40px rgba(16, 185, 129, 0.15)"
-      }}
+    <div
       onClick={handleClick}
-      className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg border-2 border-green-100 hover:border-emerald-300 hover:shadow-lg overflow-hidden group cursor-pointer transition-all duration-300"
+      className="bg-white rounded-2xl border border-gray-200 hover:border-[#4cc253] p-6 cursor-pointer transition-all duration-200 hover:shadow-md"
     >
-      <div className="p-6">
-        <div className="flex items-center space-x-4 mb-6">
-          <motion.div
-            className="relative"
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg ring-2 ring-white">
-              <UserAvatar
-                cedula={person.code}
-                alt={person.name}
-                className="w-full h-full object-cover"
-                defaultAvatar=""
-              />
-            </div>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-lg"
-            >
-              <Sparkles className="h-3 w-3 text-white" />
-            </motion.div>
-          </motion.div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-gray-800 truncate mb-1">
-              {person.name}
-            </h3>
-            <div className="flex items-center space-x-2">
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${person.role === 'admin'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-emerald-100 text-emerald-800'
-                }`}>
-                {person.role === 'admin' ? 'Administrador' : 'Empleado'}
-              </span>
-            </div>
-          </div>
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-200">
+          <UserAvatar
+            cedula={person.code}
+            alt={person.name}
+            className="w-full h-full object-cover"
+            defaultAvatar=""
+          />
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-            <div className="p-2 bg-emerald-100 rounded-lg">
-              <CreditCard className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Código</p>
-              <p className="text-sm font-semibold text-gray-800">{person.code}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
-            <div className="p-2 bg-emerald-100 rounded-lg">
-              <Briefcase className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Cargo</p>
-              <p className="text-sm font-semibold text-gray-800 truncate">{person.cargo || 'No especificado'}</p>
-            </div>
-          </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-bold text-gray-900 truncate mb-1">
+            {person.name}
+          </h3>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide ${person.role === 'admin'
+            ? 'bg-red-50 text-red-700'
+            : 'bg-[#4cc253]/10 text-[#4cc253]'
+            }`}>
+            {person.role === 'admin' ? 'Admin' : 'Empleado'}
+          </span>
         </div>
-
-        <motion.div
-          className="mt-6 p-3 rounded-xl text-center font-semibold transition-all duration-300 bg-gray-50 text-gray-600 group-hover:bg-emerald-50 group-hover:text-emerald-700"
-        >
-          <div className="flex items-center justify-center space-x-2">
-            <Eye className="h-4 w-4" />
-            <span>Ver Detalles</span>
-          </div>
-        </motion.div>
       </div>
-    </motion.div>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-sm">
+          <CreditCard className="h-4 w-4 text-gray-400" />
+          <span className="text-gray-600 font-medium">{person.code}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <Briefcase className="h-4 w-4 text-gray-400" />
+          <span className="text-gray-600 truncate">{person.cargo || 'No especificado'}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-2 text-sm font-bold text-gray-500">
+        <Eye className="h-4 w-4" />
+        Ver detalles
+      </div>
+    </div>
   );
 });
 
@@ -697,92 +650,55 @@ const Pagination = memo(({ pagination, onPageChange, isTransitioning = false }: 
       animate={{ opacity: 1, y: 0 }}
       className="mt-8 space-y-6"
     >
-      {/* Información de paginación mejorada */}
-      <div className="text-center">
-        <div className="text-sm text-gray-600 mb-2">
-          <span className="font-semibold text-emerald-600">
-            Página {pagination.page} de {pagination.totalPages}
-          </span>
-        </div>
-        <div className="text-xs text-gray-500">
-          Mostrando <span className="font-medium">{Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}</span> - <span className="font-medium">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> de <span className="font-medium text-emerald-600">{pagination.total}</span> usuarios
-        </div>
+      <div className="text-center mb-4">
+        <p className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Página {pagination.page} de {pagination.totalPages}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)} - {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total}
+        </p>
       </div>
 
-      {/* Controles de paginación mejorados */}
-      <div className="flex items-center justify-center">
-        <div className="flex items-center space-x-1 bg-white rounded-2xl shadow-lg border border-gray-200 p-2">
-          {/* Botón anterior */}
-          <button
-            onClick={handlePrevious}
-            disabled={pagination.page === 1 || isTransitioning}
-            className="p-2 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all duration-200"
-            title="Página anterior"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
-          {/* Números de página */}
-          <div className="flex items-center space-x-1">
-            {getPageNumbers.map((page, index) => (
-              <React.Fragment key={`page-${index}-${page}`}>
-                {page === '...' ? (
-                  <span className="px-3 py-2 text-gray-400 text-sm font-medium">...</span>
-                ) : (
-                  <motion.button
-                    whileHover={!isTransitioning ? { scale: 1.05 } : {}}
-                    whileTap={!isTransitioning ? { scale: 0.95 } : {}}
-                    onClick={() => handlePageClick(page as number)}
-                    disabled={isTransitioning}
-                    className={`min-w-[40px] h-10 px-3 rounded-xl text-sm font-semibold transition-all duration-200 ${pagination.page === page
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md transform scale-105'
-                      : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 hover:shadow-sm'
-                      } ${isTransitioning ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={`Ir a página ${page}`}
-                  >
-                    {page}
-                  </motion.button>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {/* Botón siguiente */}
-          <button
-            onClick={handleNext}
-            disabled={pagination.page === pagination.totalPages || isTransitioning}
-            className="p-2 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-600 transition-all duration-200"
-            title="Página siguiente"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Navegación rápida para móviles */}
-      <div className="flex sm:hidden items-center justify-between px-4">
+      {/* Controles de paginación */}
+      <div className="flex items-center justify-center gap-2">
         <button
           onClick={handlePrevious}
           disabled={pagination.page === 1 || isTransitioning}
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronLeft className="h-4 w-4" />
-          <span>Anterior</span>
+          <ChevronLeft className="h-5 w-5" />
         </button>
 
-        <span className="text-sm font-medium text-gray-600">
-          {pagination.page} / {pagination.totalPages}
-        </span>
+        <div className="flex items-center gap-1">
+          {getPageNumbers.map((page, index) => (
+            <React.Fragment key={`page-${index}-${page}`}>
+              {page === '...' ? (
+                <span className="px-3 text-gray-400 text-sm">...</span>
+              ) : (
+                <button
+                  onClick={() => handlePageClick(page as number)}
+                  disabled={isTransitioning}
+                  className={`min-w-[40px] h-10 px-3 rounded-xl text-sm font-bold transition-all ${pagination.page === page
+                    ? 'bg-[#4cc253] text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                    } ${isTransitioning ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {page}
+                </button>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
 
         <button
           onClick={handleNext}
           disabled={pagination.page === pagination.totalPages || isTransitioning}
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <span>Siguiente</span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
+
     </motion.div>
   );
 });
@@ -1452,7 +1368,7 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
     );
 
     return typeof window !== 'undefined' ? createPortal(modalContent, document.body) : null;
-  }, [showModal, editingPerson, modalMode, handleCloseModal, handleEditPerson, loading, handleSavePerson, handleDeletePerson, apiError, cedulaSearch, isSearchingCedula, cedulaError, handleSearchByCedula, operatorInfo]);
+  }, [showModal, editingPerson, modalMode, handleCloseModal, handleEditPerson, loading, handleSavePerson, handleDeletePerson, apiError, cedulaSearch, isSearchingCedula, cedulaError, handleSearchByCedula, operatorInfo, handleSaveUser, isSaving, setEditingPerson]);
 
   if (loading && people.length === 0) {
     return (
@@ -1492,28 +1408,27 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 relative">
-      <BackgroundAnimation />
+    <div className="min-h-screen bg-gray-50">
 
       {/* Header - Fixed with higher z-index */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-emerald-100 shadow-sm"
+        className="sticky top-0 z-50 bg-white border-b border-gray-200"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <motion.div
                 whileHover={{ rotate: 15, scale: 1.1 }}
-                className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl shadow-lg"
+                className="p-3 bg-[#4cc253] rounded-xl"
               >
                 <Database className="h-8 w-8 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-                <p className="text-gray-600">Administra los usuarios del sistema</p>
+                <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Gestión de Usuarios</h1>
+                <p className="text-gray-500 text-sm font-medium">Administra los usuarios del sistema</p>
               </div>
             </div>
 
@@ -1539,22 +1454,21 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
                   setModalMode('create');
                   setShowModal(true);
                 }}
-                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all font-semibold shadow-lg"
+                className="flex items-center space-x-2 px-6 py-3 bg-[#4cc253] text-white rounded-xl hover:bg-[#3da343] transition-all font-bold shadow-lg shadow-[#4cc253]/20"
               >
                 <UserPlus className="h-5 w-5" />
                 <span>Agregar Usuario</span>
               </button>
               <div className="text-right">
-                <p className="text-sm text-gray-500">Total de usuarios</p>
-                <p className="text-2xl font-bold text-emerald-600">{pagination.total}</p>
+                <p className="text-sm text-gray-400 uppercase tracking-wide font-bold">Total de usuarios</p>
+                <p className="text-2xl font-black text-[#4cc253]">{pagination.total}</p>
               </div>
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* Main Content - Add top padding to account for fixed header */}
-      <div className="pt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <div className="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {/* Error display */}
         {apiError && (
           <motion.div
@@ -1580,16 +1494,16 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-8"
         >
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-emerald-100 p-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6">
             {/* Search Bar */}
             <div className="relative mb-6">
-              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-emerald-500" />
+              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar por nombre, código o cargo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-16 pr-12 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 transition-all duration-300 text-lg"
+                className="w-full pl-16 pr-12 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#4cc253]/20 focus:border-[#4cc253] transition-all duration-200 text-lg font-medium"
               />
               {searchTerm && (
                 <button
@@ -1606,7 +1520,7 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
               <div className="flex items-center space-x-4">
                 <button
                   onClick={toggleFilters}
-                  className="flex items-center space-x-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#4cc253]/10 text-[#4cc253] rounded-xl hover:bg-[#4cc253]/20 transition-colors font-bold"
                 >
                   <Filter className="h-4 w-4" />
                   <span>Filtros</span>
@@ -1627,7 +1541,7 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
               </div>
 
               <div className="text-sm text-gray-600">
-                <span className="font-semibold text-emerald-600">{pagination.total}</span>
+                <span className="font-bold text-[#4cc253]">{pagination.total}</span>
                 {pagination.total === 1 ? ' usuario encontrado' : ' usuarios encontrados'}
               </div>
             </div>
@@ -1647,9 +1561,9 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
                       <button
                         key={area}
                         onClick={() => handleAreaSelect(area)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${selectedArea === area
-                          ? 'bg-emerald-500 text-white shadow-lg'
-                          : 'bg-gray-100 text-gray-600 hover:bg-emerald-100 hover:text-emerald-700'
+                        className={`px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-wide transition-all ${selectedArea === area
+                          ? 'bg-[#4cc253] text-white shadow-lg shadow-[#4cc253]/20'
+                          : 'bg-gray-100 text-gray-600 hover:bg-[#4cc253]/10 hover:text-[#4cc253]'
                           }`}
                       >
                         {area}
@@ -1687,10 +1601,7 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
             )}
           </AnimatePresence>
 
-          <motion.div
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 transition-opacity duration-300 ${isPageTransition ? 'opacity-50' : 'opacity-100'
-              }`}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {people.map((person, index) => (
                 <PersonCard
@@ -1701,7 +1612,7 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
                 />
               ))}
             </AnimatePresence>
-          </motion.div>
+          </div>
         </motion.div>
 
         {/* Pagination */}
@@ -1724,43 +1635,43 @@ const AdminUsersModal = ({ isOpen, onClose }: AdminUsersModalProps) => {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="w-32 h-32 bg-gradient-to-br from-emerald-200 to-green-300 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl"
+              className="w-32 h-32 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-sm"
             >
-              <Search className="h-16 w-16 text-emerald-700" />
+              <Search className="h-16 w-16 text-gray-400" />
             </motion.div>
             <h3 className="text-3xl font-bold text-gray-700 mb-4">No se encontraron usuarios</h3>
             <p className="text-gray-500 text-xl mb-6">Intenta con otros términos de búsqueda</p>
             <button
               onClick={clearSearch}
-              className="px-6 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors font-semibold"
+              className="px-6 py-3 bg-[#4cc253] text-white rounded-xl hover:bg-[#3da343] transition-colors font-bold shadow-lg shadow-[#4cc253]/20"
             >
               Limpiar filtros
             </button>
           </motion.div>
         )}
-      </div>
 
-      {/* Modal */}
-      <PersonModalComponent
-        showModal={showModal}
-        editingPerson={editingPerson}
-        modalMode={modalMode}
-        handleCloseModal={handleCloseModal}
-        handleEditPerson={handleEditPerson}
-        loading={loading}
-        handleSavePerson={handleSavePerson}
-        handleDeletePerson={handleDeletePerson}
-        apiError={apiError}
-        cedulaSearch={cedulaSearch}
-        setCedulaSearch={setCedulaSearch}
-        isSearchingCedula={isSearchingCedula}
-        cedulaError={cedulaError}
-        handleSearchByCedula={handleSearchByCedula}
-        operatorInfo={operatorInfo}
-        handleSaveUser={handleSaveUser}
-        isSaving={isSaving}
-        setEditingPerson={setEditingPerson}
-      />
+        {/* Modal */}
+        <PersonModalComponent
+          showModal={showModal}
+          editingPerson={editingPerson}
+          modalMode={modalMode}
+          handleCloseModal={handleCloseModal}
+          handleEditPerson={handleEditPerson}
+          loading={loading}
+          handleSavePerson={handleSavePerson}
+          handleDeletePerson={handleDeletePerson}
+          apiError={apiError}
+          cedulaSearch={cedulaSearch}
+          setCedulaSearch={setCedulaSearch}
+          isSearchingCedula={isSearchingCedula}
+          cedulaError={cedulaError}
+          handleSearchByCedula={handleSearchByCedula}
+          operatorInfo={operatorInfo}
+          handleSaveUser={handleSaveUser}
+          isSaving={isSaving}
+          setEditingPerson={setEditingPerson}
+        />
+      </div>
     </div>
   );
 }

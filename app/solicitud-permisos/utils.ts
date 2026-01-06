@@ -216,3 +216,20 @@ export function getFileType(filename: string): string {
 
     return extension.toUpperCase()
 }
+
+/**
+ * Obtiene la información de la fecha actual
+ */
+export function getTodayDateInfo(): DateInfo {
+    const today = new Date()
+
+    return {
+        date: today,
+        formattedDate: format(today, "yyyy-MM-dd"),
+        shortDate: format(today, "dd/MM"),
+        dayName: format(today, "EEEE", { locale: es }),
+        dayNumber: format(today, "d"),
+        monthName: format(today, "MMMM", { locale: es }),
+        year: format(today, "yyyy"),
+    }
+}

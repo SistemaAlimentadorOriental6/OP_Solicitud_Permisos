@@ -319,6 +319,11 @@ admin.get('/requests', requireAnyPermission(['requests:read', 'requests:read_own
       console.log('DEBUG BACKEND: Aplicando filtro userType=se_maintenance');
       wherePerms.push('p.userType = ?');
       paramsPerms.push('se_maintenance');
+    } else if (userType && userType === 'se_operaciones') {
+      // Para se_operaciones: mostrar solo registros que NO sean se_maintenance
+      console.log('DEBUG BACKEND: Aplicando filtro para se_operaciones - excluyendo se_maintenance');
+      wherePerms.push('(p.userType IS NULL OR p.userType IN (?, ?, ?))');
+      paramsPerms.push('se_operaciones', 'employee', 'registered');
     } else {
       console.log('DEBUG BACKEND: No se aplica filtro userType, valor recibido:', userType);
     }
@@ -374,12 +379,21 @@ admin.get('/requests', requireAnyPermission(['requests:read', 'requests:read_own
 
     // --- FIN NUEVO ---
 
-    // Union de ambas tablas para poder ordenar y paginar sobre el conjunto completo
-    // Si el usuario solo puede ver sus propias solicitudes O es se_maintenance, ajustar consulta
-    let unionQuery;
-    if (shouldFilterByUserCode || userType === 'se_maintenance') {
-      unionQuery = `
-        (SELECT p.id, p.code, p.name, p.telefono as phone, p.fecha as dates, p.hora as time,
+    const source = c.req.query('source'); // 'all', 'permisos', 'postulaciones'
+
+    // Logic to select query parts based on source
+    const includePerms = !source || source === 'all' || source === 'permisos';
+    // Se_maintenance users should NOT see permit_post table at all (it doesn't have userType column)
+    const includePost = (userType !== 'se_maintenance') && (!source || source === 'all' || source === 'postulaciones');
+
+    // Construcción de la consulta UNION
+    let parts: string[] = [];
+    let queryParams: any[] = [];
+
+    // Parte Permisos
+    if (includePerms) {
+      if (shouldFilterByUserCode || userType === 'se_maintenance') {
+        parts.push(`(SELECT p.id, p.code, p.name, p.telefono as phone, p.fecha as dates, p.hora as time,
                 p.tipo_novedad as type, p.tipo_novedad as noveltyType, p.description,
                 p.files, p.time_created as createdAt, p.solicitud as status,
                 p.respuesta as reason, p.notifications, 'permiso' as request_type,
@@ -393,24 +407,9 @@ admin.get('/requests', requireAnyPermission(['requests:read', 'requests:read_own
          FROM permit_perms p
          LEFT JOIN users u ON p.code = u.code
          ${dateFilterPerms}
-         ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})
-        UNION ALL
-        (SELECT p.id, p.code, p.name, NULL as phone, NULL as dates, NULL as time,
-                p.tipo_novedad as type, p.tipo_novedad as noveltyType, p.description,
-                NULL as files, p.time_created as createdAt, p.solicitud as status, 
-                p.respuesta as reason, p.notifications, 'postulaciones' as request_type,
-                p.zona, p.comp_am as codeAM, p.comp_pm as codePM, p.turno as shift,
-                u.password, 'registered' as userType, 'Usuario Registrado' as tipo_usuario_desc
-         FROM permit_post p
-         LEFT JOIN users u ON p.code = u.code
-         ${dateFilterPost}
-         ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})
-        ORDER BY createdAt DESC
-        LIMIT ? OFFSET ?
-      `;
-    } else {
-      unionQuery = `
-        (SELECT p.id, p.code, p.name, p.telefono as phone, p.fecha as dates, p.hora as time,
+         ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})`);
+      } else {
+        parts.push(`(SELECT p.id, p.code, p.name, p.telefono as phone, p.fecha as dates, p.hora as time,
                 p.tipo_novedad as type, p.tipo_novedad as noveltyType, p.description,
                 p.files, p.time_created as createdAt, p.solicitud as status,
                 p.respuesta as reason, p.notifications, 'permiso' as request_type,
@@ -424,93 +423,65 @@ admin.get('/requests', requireAnyPermission(['requests:read', 'requests:read_own
          FROM permit_perms p
          LEFT JOIN users u ON p.code = u.code
          ${dateFilterPerms}
-         ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})
-        UNION ALL
-        (SELECT p.id, p.code, p.name, NULL as phone, NULL as dates, NULL as time,
-                p.tipo_novedad as type, p.tipo_novedad as noveltyType, p.description,
-                NULL as files, p.time_created as createdAt, p.solicitud as status, 
-                p.respuesta as reason, p.notifications, 'postulaciones' as request_type,
-                p.zona, p.comp_am as codeAM, p.comp_pm as codePM, p.turno as shift,
-                u.password, 'registered' as userType, 'Usuario Registrado' as tipo_usuario_desc
-         FROM permit_post p
-         LEFT JOIN users u ON p.code = u.code
-         ${dateFilterPost}
-         ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})
-        ORDER BY createdAt DESC
-        LIMIT ? OFFSET ?
-      `;
+         ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})`);
+      }
+      queryParams.push(...paramsPerms);
     }
 
-    // Construir consulta de conteo total con los mismos filtros
-    let totalCountQuery;
-    if (shouldFilterByUserCode || userType === 'se_maintenance') {
-      totalCountQuery = `
-        SELECT COUNT(*) as total
-        FROM permit_perms p
-        LEFT JOIN users u ON p.code = u.code
-        ${dateFilterPerms}
-        ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''}
-      `;
-    } else {
-      totalCountQuery = `
-        SELECT COUNT(*) as total
-        FROM (
-          (SELECT p.id FROM permit_perms p
-           LEFT JOIN users u ON p.code = u.code
-           ${dateFilterPerms}
-           ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})
-          UNION ALL
-          (SELECT p.id FROM permit_post p
-           LEFT JOIN users u ON p.code = u.code
-           ${dateFilterPost}
-           ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})
-        ) as total
-      `;
+    // Parte Postulaciones
+    if (includePost) {
+      // Logic for columns matches original
+      parts.push(`(SELECT p.id, p.code, p.name, NULL as phone, NULL as dates, NULL as time,
+                p.tipo_novedad as type, p.tipo_novedad as noveltyType, p.description,
+                NULL as files, p.time_created as createdAt, p.solicitud as status, 
+                p.respuesta as reason, p.notifications, 'postulaciones' as request_type,
+                p.zona, p.comp_am as codeAM, p.comp_pm as codePM, p.turno as shift,
+                u.password, 'registered' as userType, 'Usuario Registrado' as tipo_usuario_desc
+         FROM permit_post p
+         LEFT JOIN users u ON p.code = u.code
+         ${dateFilterPost}
+         ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})`);
+      queryParams.push(...paramsPost);
     }
-    // Consulta para obtener estadísticas por estado con filtros aplicados
-    let statsQuery;
-    if (shouldFilterByUserCode || userType === 'se_maintenance') {
-      statsQuery = `
-        SELECT 
-          solicitud as status,
-          COUNT(*) as count
-        FROM permit_perms p
-        LEFT JOIN users u ON p.code = u.code
-        ${dateFilterPerms}
-        ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''}
-        GROUP BY solicitud
-      `;
-    } else {
-      statsQuery = `
-        SELECT 
-          solicitud as status,
-          COUNT(*) as count
-        FROM (
-          (SELECT p.solicitud FROM permit_perms p
-           LEFT JOIN users u ON p.code = u.code
-           ${dateFilterPerms}
-           ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})
-          UNION ALL
-          (SELECT p.solicitud FROM permit_post p
-           LEFT JOIN users u ON p.code = u.code
-           ${dateFilterPost}
-           ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})
-        ) as all_requests
-        GROUP BY solicitud
-      `;
+
+    let unionQuery = parts.join(' UNION ALL ') + ' ORDER BY createdAt DESC LIMIT ? OFFSET ?';
+
+    // Fallback if no parts selected (shouldn't happen with default logic)
+    if (parts.length === 0) unionQuery = "SELECT NULL LIMIT 0";
+
+    // Construcción de Total Count
+    let countParts: string[] = [];
+    let countParams: any[] = [];
+
+    if (includePerms) {
+      countParts.push(`(SELECT p.id FROM permit_perms p LEFT JOIN users u ON p.code = u.code ${dateFilterPerms} ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})`);
+      countParams.push(...paramsPerms);
     }
+    if (includePost) {
+      countParts.push(`(SELECT p.id FROM permit_post p LEFT JOIN users u ON p.code = u.code ${dateFilterPost} ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})`);
+      countParams.push(...paramsPost);
+    }
+
+    let totalCountQuery = `SELECT COUNT(*) as total FROM (${countParts.join(' UNION ALL ')}) as total_table`;
+
+    // Construcción de Stats
+    let statsParts: string[] = [];
+    let statsParams: any[] = [];
+
+    if (includePerms) {
+      statsParts.push(`(SELECT p.solicitud FROM permit_perms p LEFT JOIN users u ON p.code = u.code ${dateFilterPerms} ${wherePerms.length > 0 ? (dateFilterPerms ? ' AND ' : ' WHERE ') + wherePerms.join(' AND ') : ''})`);
+      statsParams.push(...paramsPerms);
+    }
+    if (includePost) {
+      statsParts.push(`(SELECT p.solicitud FROM permit_post p LEFT JOIN users u ON p.code = u.code ${dateFilterPost} ${wherePost.length > 0 ? (dateFilterPost ? ' AND ' : ' WHERE ') + wherePost.join(' AND ') : ''})`);
+      statsParams.push(...paramsPost);
+    }
+
+    let statsQuery = `SELECT solicitud as status, COUNT(*) as count FROM (${statsParts.join(' UNION ALL ')}) as all_requests GROUP BY solicitud`;
 
     // Agregar parámetros de paginación al final
-    let finalQueryParams, totalCountParams, statsParams;
-    if (shouldFilterByUserCode || userType === 'se_maintenance') {
-      finalQueryParams = limit === -1 ? [...paramsPerms] : [...paramsPerms, limit, offset];
-      totalCountParams = [...paramsPerms];
-      statsParams = [...paramsPerms];
-    } else {
-      finalQueryParams = limit === -1 ? [...paramsPerms, ...paramsPost] : [...paramsPerms, ...paramsPost, limit, offset];
-      totalCountParams = [...paramsPerms, ...paramsPost];
-      statsParams = [...paramsPerms, ...paramsPost];
-    }
+    const finalQueryParams = limit === -1 ? [...queryParams] : [...queryParams, limit, offset];
+    const totalCountParams = [...countParams];
 
     if (limit === -1) {
       unionQuery = unionQuery.replace('LIMIT ? OFFSET ?', '');

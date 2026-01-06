@@ -28,7 +28,8 @@ import { submitPermitRequest, checkExistingPermits, updateUserPhone, getUserPerm
 import {
   getCalendarDatesWithHolidays,
   getFixedRangeDates,
-  getExtemporaneousDates
+  getExtemporaneousDates,
+  getTodayDateInfo
 } from "./utils"
 import { validateFile, createFileWithInfo } from "./file-utils"
 import { FileWithInfo, UserPermit } from "./types"
@@ -97,7 +98,17 @@ export default function SolicitudPermisosPage() {
   )
 
   // Cargar fechas del calendario
-  const { regularDates, upcomingHolidays } = getCalendarDatesWithHolidays()
+  const { regularDates: initialRegularDates, upcomingHolidays } = getCalendarDatesWithHolidays()
+
+  const regularDates = useMemo(() => {
+    if (noveltyType === 'calamidad') {
+      const today = getTodayDateInfo()
+      if (!initialRegularDates.some((d) => d.formattedDate === today.formattedDate)) {
+        return [today, ...initialRegularDates]
+      }
+    }
+    return initialRegularDates
+  }, [noveltyType, initialRegularDates])
 
   // Cargar permisos existentes del usuario
   const fetchPermits = async () => {

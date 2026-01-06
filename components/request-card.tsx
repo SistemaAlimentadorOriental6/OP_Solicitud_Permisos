@@ -28,25 +28,25 @@ import {
   XCircle,
   AlertTriangle,
   X,
+  Activity,
+  Plus,
+  Minus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
   Phone,
   Mail,
   Building2,
   Hash,
   Filter,
-  Search,
   ChevronDown,
   ChevronUp,
-  Activity,
   TrendingUp,
   BarChart3,
   PieChart,
   MessageSquare,
   Paperclip,
   Send,
-  Plus,
-  Minus,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
   RefreshCw
 } from "lucide-react"
@@ -126,15 +126,16 @@ const UserAvatar = memo(({ name, photoUrl, size = "md", showStatus = true }: {
   const [imageLoading, setImageLoading] = useState(true)
 
   const sizeClasses = {
-    xs: "w-6 h-6 text-xs",
-    sm: "w-8 h-8 text-xs",
-    md: "w-12 h-12 text-sm",
-    lg: "w-16 h-16 text-base",
+    xs: "w-6 h-6 text-[10px]",
+    sm: "w-8 h-8 text-[11px]",
+    md: "w-10 h-10 text-xs",
+    lg: "w-14 h-14 text-base",
     xl: "w-20 h-20 text-lg"
   }
 
   const initials = name
     .split(" ")
+    .filter(Boolean)
     .map((n: string) => n[0])
     .join("")
     .toUpperCase()
@@ -142,41 +143,25 @@ const UserAvatar = memo(({ name, photoUrl, size = "md", showStatus = true }: {
 
   return (
     <div className={`relative ${sizeClasses[size]} flex-shrink-0`}>
-      {photoUrl && !imageError ? (
-        <>
-          {imageLoading && (
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl flex items-center justify-center animate-pulse">
-              <User className="h-1/2 w-1/2 text-emerald-600" />
-            </div>
-          )}
+      <div className={`w-full h-full rounded-full overflow-hidden border border-green-100 bg-white shadow-sm transition-all duration-300 group-hover:border-[#4cc253]`}>
+        {photoUrl && !imageError ? (
           <img
             src={photoUrl}
-            alt={`Foto de ${name}`}
-            className={`w-full h-full rounded-2xl object-cover border-2 border-white shadow-lg ring-2 ring-emerald-100 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'
-              }`}
+            alt={name}
+            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
             onLoad={() => setImageLoading(false)}
-            onError={() => {
-              setImageError(true)
-              setImageLoading(false)
-            }}
+            onError={() => setImageError(true)}
             loading="lazy"
           />
-        </>
-      ) : (
-        <div className="w-full h-full bg-gradient-to-br from-emerald-500 via-green-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-emerald-100 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-          <span className="relative z-10 drop-shadow-sm">{initials}</span>
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-green-50 text-green-700 font-bold italic">
+            {initials}
+          </div>
+        )}
+      </div>
 
       {showStatus && (
-        <motion.div
-          className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white"
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Sparkles className="h-2 w-2 text-white" />
-        </motion.div>
+        <span className="absolute bottom-0.5 right-0.5 block h-2.5 w-2.5 rounded-full bg-[#4cc253] ring-2 ring-white shadow-sm" />
       )}
     </div>
   )
@@ -191,39 +176,36 @@ const StatusBadge = memo(({ status, size = "sm" }: { status: string; size?: "xs"
       case 'aprobado':
         return {
           icon: CheckCircle2,
-          color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          iconColor: 'text-emerald-600'
+          color: 'bg-[#4cc253] text-white border-[#4cc253]',
         }
       case 'rechazado':
         return {
           icon: XCircle,
-          color: 'bg-red-100 text-red-800 border-red-200',
-          iconColor: 'text-red-600'
+          color: 'bg-white text-green-900 border-green-200',
         }
       case 'pendiente':
       default:
         return {
-          icon: AlertTriangle,
-          color: 'bg-amber-100 text-amber-800 border-amber-200',
-          iconColor: 'text-amber-600'
+          icon: Clock,
+          color: 'bg-green-50 text-green-700 border-green-100',
         }
     }
   }
 
   const sizeClasses = {
-    xs: 'px-2 py-1 text-xs',
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm'
+    xs: 'px-2 py-0.5 text-[10px]',
+    sm: 'px-2.5 py-1 text-xs',
+    md: 'px-3 py-1.5 text-sm'
   }
 
   const config = getStatusConfig(status)
   const IconComponent = config.icon
 
   return (
-    <Badge className={`${config.color} border-2 ${sizeClasses[size]} rounded-xl font-semibold shadow-sm flex items-center space-x-1.5`}>
-      <IconComponent className={`h-3.5 w-3.5 ${config.iconColor}`} />
+    <div className={`inline-flex items-center gap-1.5 rounded-full border ${config.color} ${sizeClasses[size]} font-semibold shadow-sm transition-all hover:scale-105`}>
+      <IconComponent className="h-3 w-3" />
       <span className="capitalize">{status}</span>
-    </Badge>
+    </div>
   )
 })
 
@@ -292,113 +274,31 @@ const DetailedRequestItem = memo(({
   onSelect: (request: Request) => void;
   onRequestClick: (request: Request) => void;
 }) => {
-  const getTypeIcon = useCallback((type: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      descanso: <Timer className="h-4 w-4" />,
-      cita: <Calendar className="h-4 w-4" />,
-      audiencia: <Shield className="h-4 w-4" />,
-      licencia: <FileText className="h-4 w-4" />,
-      diaAM: <Clock className="h-4 w-4" />,
-      diaPM: <Clock className="h-4 w-4" />,
-      "Turno pareja": <Users className="h-4 w-4" />,
-      "Tabla partida": <Target className="h-4 w-4" />,
-      "Disponible fijo": <Briefcase className="h-4 w-4" />,
-    }
-    return icons[type] || <FileText className="h-4 w-4" />
-  }, [])
-
-  const getTypeColor = useCallback((type: string) => {
-    const colors: Record<string, { bg: string; gradient: string }> = {
-      descanso: { bg: "bg-blue-500", gradient: "from-blue-500 to-blue-600" },
-      cita: { bg: "bg-purple-500", gradient: "from-purple-500 to-purple-600" },
-      audiencia: { bg: "bg-orange-500", gradient: "from-orange-500 to-orange-600" },
-      licencia: { bg: "bg-pink-500", gradient: "from-pink-500 to-pink-600" },
-      diaAM: { bg: "bg-indigo-500", gradient: "from-indigo-500 to-indigo-600" },
-      diaPM: { bg: "bg-violet-500", gradient: "from-violet-500 to-violet-600" },
-      "Turno pareja": { bg: "bg-teal-500", gradient: "from-teal-500 to-teal-600" },
-      "Tabla partida": { bg: "bg-cyan-500", gradient: "from-cyan-500 to-cyan-600" },
-      "Disponible fijo": { bg: "bg-emerald-500", gradient: "from-emerald-500 to-emerald-600" },
-    }
-    return colors[type] || { bg: "bg-gray-500", gradient: "from-gray-500 to-gray-600" }
-  }, [])
-
-  const typeColor = getTypeColor(request.type)
-
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={`p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${isSelected
-        ? 'bg-emerald-50 border-emerald-300 shadow-lg shadow-emerald-100'
-        : 'bg-white border-gray-200 hover:border-emerald-200 hover:shadow-md'
+      className={`group relative flex flex-col gap-3 rounded-xl border p-4 transition-all duration-300 cursor-pointer ${isSelected
+          ? 'border-[#4cc253] bg-green-50/50 shadow-md ring-1 ring-green-500/10'
+          : 'border-green-100 bg-white hover:border-[#4cc253] hover:shadow-soft'
         }`}
       onClick={() => onRequestClick(request)}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center space-x-3">
-          <motion.div
-            className={`w-10 h-10 rounded-xl bg-gradient-to-br ${typeColor.gradient} flex items-center justify-center shadow-lg text-white`}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-          >
-            {getTypeIcon(request.type)}
-          </motion.div>
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg border border-green-100 bg-green-50 text-[#4cc253]`}>
+            <FileText className="h-4 w-4" />
+          </div>
           <div>
-            <h4 className="font-bold text-gray-900">{request.type}</h4>
-            <p className="text-sm text-gray-500">#{request.code}</p>
+            <h4 className="text-sm font-bold text-green-950 leading-tight">{request.type}</h4>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">ID: {request.code}</span>
           </div>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <StatusBadge status={request.status || 'pendiente'} size="xs" />
-          <div className="flex space-x-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onEdit(request)
-                    }}
-                    className="h-8 w-8 p-0 hover:bg-blue-50"
-                  >
-                    <Edit className="h-3 w-3 text-blue-600" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Editar solicitud</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onDelete(request)
-                    }}
-                    className="h-8 w-8 p-0 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3 w-3 text-red-600" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Eliminar solicitud</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
+        <StatusBadge status={request.status || 'pendiente'} size="xs" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center space-x-2 text-gray-600">
-          <Calendar className="h-3 w-3" />
+      <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-green-800/70">
+        <div className="flex items-center gap-1.5">
+          <Calendar className="h-3.5 w-3.5 text-[#4cc253]" />
           <span>
             {request.dates
               ? Array.isArray(request.dates)
@@ -406,23 +306,25 @@ const DetailedRequestItem = memo(({
                   ? `${formatDateForCard(request.dates[0])} - ${formatDateForCard(request.dates[request.dates.length - 1])}`
                   : formatDateForCard(request.dates[0])
                 : formatDateForCard(request.dates.toString())
-              : "Fecha no disponible"}
+              : "Sin fecha definida"}
           </span>
         </div>
-
         {request.zona && (
-          <div className="flex items-center space-x-2 text-gray-600">
-            <MapPin className="h-3 w-3" />
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 text-[#4cc253]" />
             <span>{request.zona}</span>
           </div>
         )}
       </div>
 
-      {request.description && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-sm text-gray-700 line-clamp-2">{request.description}</p>
-        </div>
-      )}
+      <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-green-50 opacity-0 transition-opacity group-hover:opacity-100">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-green-400 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); onEdit(request); }}>
+          <Edit className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-green-400 hover:text-red-900 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); onDelete(request); }}>
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </motion.div>
   )
 })
@@ -524,20 +426,34 @@ const DetailedViewModal = memo(({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="bg-emerald-600 p-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-50"></div>
 
             <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center space-x-4">
-                <UserAvatar name={name} size="lg" showStatus={false} />
+              <div className="flex items-center space-x-6">
+                <div className="p-1 bg-white rounded-full shadow-lg">
+                  <UserAvatar name={name} size="lg" showStatus={false} />
+                </div>
                 <div className="text-white">
-                  <h2 className="text-3xl font-bold drop-shadow-sm">{name}</h2>
-                  <p className="text-emerald-100 text-lg">
-                    {requests.length} solicitud{requests.length !== 1 ? "es" : ""} registrada{requests.length !== 1 ? "s" : ""}
-                  </p>
+                  <h2 className="text-4xl font-black tracking-tight drop-shadow-md">{name}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="px-2 py-0.5 bg-emerald-500 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-400">
+                      Empleado Activo
+                    </div>
+                    <p className="text-emerald-50 text-sm font-bold opacity-90">
+                      • {requests.length} solicitud{requests.length !== 1 ? "es" : ""} registrada{requests.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
                 </div>
               </div>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                className="text-white hover:bg-white/20 rounded-full h-12 w-12 p-0"
+              >
+                <X className="h-6 w-6" />
+              </Button>
             </div>
           </div>
 
@@ -547,45 +463,47 @@ const DetailedViewModal = memo(({
             <RequestStats requests={requests} />
 
             {/* Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+              <div className="flex-1 relative group">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-emerald-400 h-5 w-5 transition-colors group-focus-within:text-emerald-600" />
                 <Input
-                  placeholder="Buscar solicitudes..."
+                  placeholder="Buscar por tipo, código o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-2 border-gray-200 focus:border-emerald-400 rounded-xl"
+                  className="pl-12 h-12 border-emerald-100 focus:border-emerald-500 rounded-xl bg-emerald-50/10 font-medium"
                 />
               </div>
 
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-emerald-400 focus:outline-none bg-white"
-              >
-                <option value="all">Todos los tipos</option>
-                {uniqueTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+              <div className="flex gap-3">
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-4 h-12 border border-emerald-100 rounded-xl focus:border-emerald-500 focus:outline-none bg-white font-bold text-emerald-800 shadow-sm cursor-pointer"
+                >
+                  <option value="all">Filtro: Todos</option>
+                  {uniqueTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
 
-              <Button
-                onClick={handleSelectAll}
-                variant="outline"
-                className="border-2 border-emerald-200 hover:bg-emerald-50 rounded-xl"
-              >
-                {selectedRequests.size === paginatedRequests.length ? (
-                  <>
-                    <Minus className="h-4 w-4 mr-2" />
-                    Deseleccionar
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Seleccionar todo
-                  </>
-                )}
-              </Button>
+                <Button
+                  onClick={handleSelectAll}
+                  variant="outline"
+                  className="h-12 px-6 border-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl font-bold transition-all shadow-sm"
+                >
+                  {selectedRequests.size === paginatedRequests.length ? (
+                    <>
+                      <Minus className="h-4 w-4 mr-2" />
+                      Deseleccionar
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Selección Múltiple
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Selected count */}
@@ -673,54 +591,11 @@ const RequestCard = memo(
   React.forwardRef<HTMLDivElement, RequestCardProps>(
     ({ name, requests, onRequestClick, selectedRequestIds, onDelete }, ref) => {
       const [showDetailedView, setShowDetailedView] = useState(false)
-      const [isExpanded, setIsExpanded] = useState(false)
-
-      const isEquipmentRequest = !["descanso", "cita", "audiencia", "licencia", "diaAM", "diaPM"].includes(
-        requests[0]?.type || "",
-      )
-      const hasSelectedRequests = requests.some((req) => selectedRequestIds.has(req.id))
       const primaryRequest = requests[0]
-      const employeePhotoUrl = "/placeholder.svg?height=100&width=100"
-
-      const getTypeIcon = useCallback((type: string) => {
-        const icons: Record<string, React.ReactNode> = {
-          descanso: <Timer className="h-4 w-4" />,
-          cita: <Calendar className="h-4 w-4" />,
-          audiencia: <Shield className="h-4 w-4" />,
-          licencia: <FileText className="h-4 w-4" />,
-          diaAM: <Clock className="h-4 w-4" />,
-          diaPM: <Clock className="h-4 w-4" />,
-          "Turno pareja": <Users className="h-4 w-4" />,
-          "Tabla partida": <Target className="h-4 w-4" />,
-          "Disponible fijo": <Briefcase className="h-4 w-4" />,
-        }
-        return icons[type] || <FileText className="h-4 w-4" />
-      }, [])
-
-      const getTypeColor = useCallback((type: string) => {
-        const colors: Record<string, { bg: string; gradient: string }> = {
-          descanso: { bg: "bg-blue-500", gradient: "from-blue-500 to-blue-600" },
-          cita: { bg: "bg-purple-500", gradient: "from-purple-500 to-purple-600" },
-          audiencia: { bg: "bg-orange-500", gradient: "from-orange-500 to-orange-600" },
-          licencia: { bg: "bg-pink-500", gradient: "from-pink-500 to-pink-600" },
-          diaAM: { bg: "bg-indigo-500", gradient: "from-indigo-500 to-indigo-600" },
-          diaPM: { bg: "bg-violet-500", gradient: "from-violet-500 to-violet-600" },
-          "Turno pareja": { bg: "bg-teal-500", gradient: "from-teal-500 to-teal-600" },
-          "Tabla partida": { bg: "bg-cyan-500", gradient: "from-cyan-500 to-cyan-600" },
-          "Disponible fijo": { bg: "bg-emerald-500", gradient: "from-emerald-500 to-emerald-600" },
-        }
-        return colors[type] || { bg: "bg-gray-500", gradient: "from-gray-500 to-gray-600" }
-      }, [])
-
-      const handleViewAll = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation()
-        setShowDetailedView(true)
-      }, [])
-
-      const handleEditRequest = useCallback((request: Request) => {
-        // Handle edit logic here
-        console.log('Edit request:', request)
-      }, [])
+      const hasSelectedRequests = requests.some((req) => selectedRequestIds.has(req.id))
+      const isPostulacion = !["descanso", "cita", "audiencia", "licencia", "diaAM", "diaPM"].includes(
+        primaryRequest?.type || "",
+      )
 
       if (!requests.length) return null
 
@@ -728,312 +603,145 @@ const RequestCard = memo(
         <>
           <motion.div
             ref={ref}
-            className="group h-full"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{
-              duration: 0.5,
-              type: "spring",
-              stiffness: 120,
-              damping: 20
-            }}
-            whileHover={{
-              scale: 1.02,
-              y: -8,
-              transition: { duration: 0.2 }
-            }}
+            layout
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="group relative h-full"
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <Card
-                  className={`
-                    relative h-full rounded-3xl shadow-lg hover:shadow-2xl border-2
-                    transition-all duration-500 overflow-hidden backdrop-blur-sm
-                    ${hasSelectedRequests
-                      ? "ring-4 ring-emerald-300/50 shadow-emerald-200/50 border-emerald-300 bg-emerald-50/50"
-                      : "border-gray-200/50 bg-white/95 hover:border-emerald-200"
-                    }
-                    ${isEquipmentRequest ? "border-l-4 border-l-teal-500" : "border-l-4 border-l-emerald-500"}
-                  `}
-                >
-                  {/* Decorative background elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-100/20 to-green-100/20 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-green-100/20 to-emerald-100/20 rounded-full translate-y-12 -translate-x-12 blur-2xl"></div>
+                <Card className={`relative h-full overflow-hidden border-green-100 bg-white shadow-soft transition-all duration-300 hover:border-[#4cc253] hover:shadow-xl ${hasSelectedRequests ? 'ring-2 ring-[#4cc253] border-[#4cc253] bg-green-50/20' : ''}`}>
+                  {/* Premium Accent Bar */}
+                  <div className={`absolute left-0 top-0 h-1 w-full bg-[#4cc253] shadow-sm transition-transform duration-500 translate-y-[-100%] group-hover:translate-y-0`} />
 
-                  {/* Compact Header */}
-                  <CardHeader className="p-4 pb-3 bg-gradient-to-br from-emerald-50/80 via-green-50/60 to-emerald-50/80 border-b border-emerald-100/50 relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent"></div>
-
-                    <div className="flex justify-between items-center mb-3 relative z-10">
-                      <Badge
-                        className={`
-                          px-3 py-1.5 rounded-xl font-semibold text-xs border-2 shadow-sm
-                          ${isEquipmentRequest
-                            ? "bg-gradient-to-r from-teal-100 to-cyan-100 text-teal-800 border-teal-200"
-                            : "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200"
-                          }
-                        `}
-                      >
-                        <motion.div
-                          animate={{ rotate: [0, 10, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="mr-2"
-                        >
-                          {isEquipmentRequest ? <Briefcase className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
-                        </motion.div>
-                        {isEquipmentRequest ? "Postulación" : "Permiso"}
-                      </Badge>
-
-                      <div className="flex items-center space-x-2">
-                        <StatusBadge status="Pendiente" size="xs" />
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="opacity-0 group-hover:opacity-100 transition-all duration-300 h-7 w-7 p-0 rounded-xl hover:bg-white/80 shadow-sm"
-                              >
-                                <MoreVertical className="h-3 w-3 text-emerald-600" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Más opciones</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </div>
-
-                    {/* Compact User Info */}
-                    <div className="flex items-center space-x-3 relative z-10">
-                      <UserAvatar name={name} photoUrl={employeePhotoUrl} size="sm" />
-
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base font-bold text-gray-900 truncate group-hover:text-emerald-700 transition-colors duration-300">
-                          {name}
-                        </CardTitle>
-                        <div className="flex items-center space-x-2 text-xs text-emerald-600">
-                          <div className="flex items-center space-x-1">
-                            <motion.div
-                              className="w-1.5 h-1.5 bg-emerald-400 rounded-full"
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
-                            <span className="font-medium">
-                              {requests.length} solicitud{requests.length !== 1 ? "es" : ""}
-                            </span>
-                          </div>
-                          <div className="h-3 w-px bg-emerald-200"></div>
-                          <div className="flex items-center space-x-1">
-                            <Star className="h-2.5 w-2.5 text-amber-500" />
-                            <span className="text-xs font-medium text-amber-600">Alta</span>
+                  <CardContent className="flex flex-col gap-4 p-5">
+                    {/* Header: User Info & Status */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <UserAvatar name={name} size="md" />
+                        <div className="flex flex-col min-w-0">
+                          <h3 className="truncate text-sm font-black text-green-950 group-hover:text-[#4cc253] transition-colors">
+                            {name}
+                          </h3>
+                          <div className={`inline-flex items-center gap-1.5 w-fit rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${isPostulacion ? 'bg-[#4cc253] text-white shadow-sm' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+                            <div className={`h-1.5 w-1.5 rounded-full ${isPostulacion ? 'bg-white' : 'bg-[#4cc253]'}`} />
+                            {isPostulacion ? 'Postulación' : 'Permiso'}
                           </div>
                         </div>
                       </div>
+                      <StatusBadge status="Pendiente" size="xs" />
                     </div>
-                  </CardHeader>
 
-                  <CardContent className="p-4 relative z-10">
-                    {/* Primary Request - More Compact */}
-                    <motion.div
-                      className={`
-                        p-3 rounded-xl transition-all duration-300 cursor-pointer relative overflow-hidden
-                        border-2 hover:shadow-md group/request
-                        ${selectedRequestIds.has(primaryRequest.id)
-                          ? "bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300 shadow-emerald-100"
-                          : "bg-gradient-to-br from-gray-50/80 to-white border-gray-200/50 hover:border-emerald-200 hover:from-emerald-50/30 hover:to-green-50/30"
-                        }
-                      `}
-                      onClick={() => onRequestClick(primaryRequest)}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                    {/* Main Content Area */}
+                    <div className="space-y-3">
+                      {/* Primary Request Summary */}
+                      <div
+                        className={`flex items-start gap-4 rounded-xl border border-green-50 bg-green-50/20 p-4 transition-all hover:bg-white hover:border-green-300 hover:shadow-soft cursor-pointer ${selectedRequestIds.has(primaryRequest.id) ? 'bg-white border-[#4cc253] shadow-md ring-1 ring-green-500/10' : ''}`}
+                        onClick={() => onRequestClick(primaryRequest)}
+                      >
+                        <div className="flex-1 min-w-0 space-y-2.5">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-lg bg-green-100 text-green-700 shadow-sm">
+                              <FileText className="h-3.5 w-3.5" />
+                            </div>
+                            <p className="truncate text-sm font-bold text-green-900">{primaryRequest.type}</p>
+                          </div>
 
-                      <div className="flex items-center justify-between relative z-10">
-                        <div className="flex items-center space-x-3">
-                          <motion.div
-                            className={`
-                              w-8 h-8 rounded-xl bg-gradient-to-br ${getTypeColor(primaryRequest.type).gradient}
-                              flex items-center justify-center shadow-md text-white
-                            `}
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                          >
-                            {React.cloneElement(getTypeIcon(primaryRequest.type) as React.ReactElement, {
-                              className: "h-3.5 w-3.5",
-                            })}
-                          </motion.div>
-
-                          <div>
-                            <p className="font-semibold text-gray-800 text-sm">{primaryRequest.type}</p>
-                            <div className="flex items-center space-x-2 text-xs text-gray-500">
-                              <Calendar className="h-2.5 w-2.5" />
-                              <span>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-green-700/70">
+                              <Calendar className="h-3.5 w-3.5 text-[#4cc253]" />
+                              <span className="truncate">
                                 {primaryRequest.dates
                                   ? Array.isArray(primaryRequest.dates)
-                                    ? primaryRequest.dates.length > 1
-                                      ? `${formatDateForCard(primaryRequest.dates[0])} - ${formatDateForCard(primaryRequest.dates[primaryRequest.dates.length - 1])}`
-                                      : formatDateForCard(primaryRequest.dates[0])
+                                    ? formatDateForCard(primaryRequest.dates[0])
                                     : formatDateForCard(primaryRequest.dates.toString())
-                                  : "--"}
+                                  : 'Fecha pendiente'}
                               </span>
-                              {primaryRequest.zona && (
-                                <>
-                                  <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                                  <MapPin className="h-2.5 w-2.5" />
-                                  <span>{primaryRequest.zona}</span>
-                                </>
-                              )}
                             </div>
+                            {primaryRequest.zona && (
+                              <div className="flex items-center gap-2 text-[11px] font-bold text-green-700/70">
+                                <MapPin className="h-3.5 w-3.5 text-[#4cc253]" />
+                                <span className="truncate">{primaryRequest.zona}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant="outline"
-                            className="text-xs px-2 py-0.5 font-mono bg-white/80 border-emerald-200 text-emerald-700"
-                          >
-                            #{primaryRequest.code}
-                          </Badge>
-                          <ArrowRight className="h-3 w-3 text-emerald-500 group-hover/request:text-emerald-600 transition-colors" />
+                        <div className="text-[10px] font-black font-mono text-green-400 bg-white px-2 py-1 rounded-lg border border-green-50 shadow-sm">
+                          ID:{primaryRequest.code}
                         </div>
                       </div>
-                    </motion.div>
 
-                    {/* Additional Requests - More Compact */}
-                    <AnimatePresence>
+                      {/* Other Requests Snippet */}
                       {requests.length > 1 && (
-                        <motion.div
-                          className="mt-3 space-y-2"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          {requests.slice(1, isExpanded ? requests.length : 2).map((request, index) => (
-                            <motion.div
-                              key={request.id}
-                              className="p-2 rounded-lg bg-gray-50/80 border border-gray-200/50 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all duration-300 cursor-pointer"
-                              onClick={() => onRequestClick(request)}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              whileHover={{ scale: 1.01, x: 2 }}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                  <div
-                                    className={`w-6 h-6 rounded-lg bg-gradient-to-br ${getTypeColor(request.type).gradient} flex items-center justify-center shadow-sm`}
-                                  >
-                                    {React.cloneElement(getTypeIcon(request.type) as React.ReactElement, {
-                                      className: "h-3 w-3 text-white",
-                                    })}
-                                  </div>
-                                  <div>
-                                    <span className="text-xs font-semibold text-gray-800">{request.type}</span>
-                                    <p className="text-xs text-gray-500">
-                                      {request.dates
-                                        ? Array.isArray(request.dates)
-                                          ? request.dates.length > 1
-                                            ? `${formatDateForCard(request.dates[0])} - ${formatDateForCard(request.dates[request.dates.length - 1])}`
-                                            : formatDateForCard(request.dates[0])
-                                          : formatDateForCard(request.dates.toString())
-                                        : "--"}
-                                    </p>
-                                  </div>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs px-1.5 py-0.5 font-mono bg-white/60"
-                                >
-                                  #{request.code}
-                                </Badge>
+                        <div className="flex items-center justify-between px-1">
+                          <div className="flex -space-x-2 overflow-hidden">
+                            {requests.slice(1, 4).map((r, i) => (
+                              <div key={r.id} title={r.type} className="inline-block h-6 w-6 rounded-full border-2 border-white bg-[#4cc253] flex items-center justify-center text-[9px] font-black text-white shadow-sm ring-1 ring-green-200">
+                                {r.type[0].toUpperCase()}
                               </div>
-                            </motion.div>
-                          ))}
-
-                          {requests.length > 2 && (
-                            <div className="flex justify-center">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setIsExpanded(!isExpanded)
-                                }}
-                                className="text-xs text-emerald-600 hover:bg-emerald-50 h-6 px-3 rounded-lg"
-                              >
-                                {isExpanded ? (
-                                  <>
-                                    <ChevronUp className="h-3 w-3 mr-1" />
-                                    Mostrar menos
-                                  </>
-                                ) : (
-                                  <>
-                                    <ChevronDown className="h-3 w-3 mr-1" />
-                                    +{requests.length - 2} más
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          )}
-                        </motion.div>
+                            ))}
+                            {requests.length > 4 && (
+                              <div className="inline-block h-6 w-6 rounded-full border-2 border-white bg-green-50 flex items-center justify-center text-[9px] font-black text-green-700 shadow-sm ring-1 ring-green-100">
+                                +{requests.length - 4}
+                              </div>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setShowDetailedView(true); }}
+                            className="h-8 px-4 text-[11px] font-bold text-[#4cc253] hover:text-white hover:bg-[#4cc253] rounded-full transition-all border border-green-50 hover:border-green-600 shadow-sm"
+                          >
+                            Ver {requests.length} solicitudes
+                          </Button>
+                        </div>
                       )}
-                    </AnimatePresence>
-                  </CardContent>
 
-                  {/* Compact Footer */}
-                  <div className="px-4 pb-4">
-                    <div className="flex items-center justify-between pt-3 border-t border-emerald-100/50">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleViewAll}
-                        className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 h-7 px-3 text-xs font-semibold rounded-xl shadow-sm border border-emerald-200/50 hover:border-emerald-300 transition-all duration-300"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver todo
-                      </Button>
+                      {requests.length === 1 && (
+                        <div className="flex justify-end pt-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => { e.stopPropagation(); setShowDetailedView(true); }}
+                            className="h-9 px-5 text-[11px] font-bold text-green-700 hover:text-white hover:bg-[#4cc253] rounded-full transition-all border border-green-100 hover:border-[#4cc253] group/btn shadow-soft"
+                          >
+                            Gestionar Solicitud
+                            <ArrowRight className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:translate-x-1" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Hover effect overlay */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl"
-                    initial={false}
-                  />
+                  </CardContent>
                 </Card>
               </ContextMenuTrigger>
 
-              {/* Enhanced Context Menu */}
-              <ContextMenuContent className="w-56 rounded-2xl border-0 shadow-2xl bg-white/95 backdrop-blur-xl p-2">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {requests.map((request) => (
-                    <ContextMenuItem
-                      key={request.id}
-                      onClick={() => onDelete(request)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 flex items-center space-x-3 p-3 rounded-xl transition-colors cursor-pointer"
-                    >
-                      <div className="p-1.5 bg-red-100 rounded-lg">
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </div>
-                      <span className="font-medium">Eliminar {request.type}</span>
-                    </ContextMenuItem>
-                  ))}
-                </motion.div>
+              <ContextMenuContent className="w-64 rounded-xl border border-green-100 bg-white/95 p-2 shadow-2xl backdrop-blur-lg">
+                <div className="px-3 py-2 text-[10px] font-black uppercase text-green-400 tracking-widest border-b border-green-50 mb-1.5 flex items-center justify-between">
+                  <span>Acciones</span>
+                  <Activity className="h-3 w-3" />
+                </div>
+                {requests.map((request) => (
+                  <ContextMenuItem
+                    key={request.id}
+                    onClick={() => onDelete(request)}
+                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-green-950 font-bold outline-none transition-all hover:bg-green-50 hover:text-green-700 cursor-pointer"
+                  >
+                    <div className="p-1.5 rounded-md bg-green-100 shadow-sm">
+                      <Trash2 className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span>Eliminar {request.type}</span>
+                  </ContextMenuItem>
+                ))}
               </ContextMenuContent>
             </ContextMenu>
           </motion.div>
 
-          {/* Detailed View Modal */}
           <DetailedViewModal
             name={name}
             requests={requests}
             isOpen={showDetailedView}
             onClose={() => setShowDetailedView(false)}
-            onEdit={handleEditRequest}
+            onEdit={(req) => console.log('Edit', req)}
             onDelete={onDelete}
             onRequestClick={onRequestClick}
           />
