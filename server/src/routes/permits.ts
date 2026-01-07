@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { 
+import {
   PermitRequest2Schema,
   DateCheckSchema,
   PermitRequest2Input,
@@ -17,8 +17,8 @@ import { validateWithZod } from '../utils/validation.js';
 type AppEnv = {
   Variables: {
     currentUser: User;
-    payload: { 
-      sub: string; 
+    payload: {
+      sub: string;
       iat: number;
       exp: number;
     };
@@ -48,33 +48,33 @@ async function createRequestDirectory(userCode: string, requestId: string, novel
     const now = new Date();
     const year = now.getFullYear().toString();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    
+
     // Sanitizar código de usuario para nombre de carpeta
     const sanitizedUserCode = userCode.replace(/[^a-zA-Z0-9_-]/g, '_');
-    
+
     // Crear nombre de carpeta de solicitud
     const requestFolderName = `solicitud_${requestId}_${noveltyType}`;
-    
+
     // Ruta completa: uploads/2024/01/12345678/solicitud_123_cita/
     const requestDir = path.join(UPLOAD_DIR, year, month, sanitizedUserCode, requestFolderName);
-    
+
     // Crear toda la estructura de directorios
     await fs.mkdir(requestDir, { recursive: true });
-    
-    logger.info({ 
-      userCode, 
-      requestId, 
-      noveltyType, 
-      requestDir 
+
+    logger.info({
+      userCode,
+      requestId,
+      noveltyType,
+      requestDir
     }, 'Estructura de directorios creada exitosamente');
-    
+
     return requestDir;
   } catch (error) {
-    logger.error({ 
-      userCode, 
-      requestId, 
-      noveltyType, 
-      error: error instanceof Error ? error.message : String(error) 
+    logger.error({
+      userCode,
+      requestId,
+      noveltyType,
+      error: error instanceof Error ? error.message : String(error)
     }, 'Error creando estructura de directorios');
     throw new Error(`Error creando directorio para solicitud: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -85,11 +85,11 @@ function generateFileName(originalName: string, userCode: string, noveltyType: s
   const timestamp = Date.now();
   const fileExtension = path.extname(originalName);
   const baseName = path.basename(originalName, fileExtension);
-  
+
   // Sanitizar nombre original
   const sanitizedBaseName = baseName.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
   const sanitizedUserCode = userCode.replace(/[^a-zA-Z0-9_-]/g, '_');
-  
+
   // Formato: cedula_tipo_timestamp_indice_nombreOriginal.ext
   return `${sanitizedUserCode}_${noveltyType}_${timestamp}_${index + 1}_${sanitizedBaseName}${fileExtension}`;
 }
@@ -152,12 +152,12 @@ function formatFileSize(bytes: number): string {
 permits.post('/permit-request', getCurrentUser, async (c) => {
   const currentUser = c.get('currentUser') as User;
   const startTime = Date.now();
-  
+
   try {
     logger.info({ userCode: currentUser.code }, 'Iniciando procesamiento de solicitud de permiso');
-    
+
     const formData = await c.req.formData();
-    
+
     // Extraer datos del formulario
     const code = formData.get('code') as string;
     const name = formData.get('name') as string;
@@ -168,11 +168,11 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
     const description = formData.get('description') as string;
     const autoApprove = formData.get('autoApprove') as string | null;
     const files = formData.getAll('files') as File[];
-    
+
     // Extraer metadatos de archivos si existen
     const fileMetadata: any[] = [];
     const filesSummary = formData.get('files_summary') as string;
-    
+
     // Procesar metadatos de archivos
     for (let i = 0; i < files.length; i++) {
       const metadataStr = formData.get(`file_metadata_${i}`) as string;
@@ -185,12 +185,12 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
         }
       }
     }
-    
+
     // Validar datos requeridos
     if (!code || !name || !dates || !noveltyType) {
       throw new HTTPException(400, { message: 'Faltan campos requeridos: code, name, dates, noveltyType' });
     }
-    
+
     // Parsear fechas
     let datesList: string[];
     try {
@@ -202,12 +202,12 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
       logger.error({ dates, error }, 'Error parseando fechas');
       throw new HTTPException(400, { message: 'Formato de fechas inválido' });
     }
-    
+
     // Validar que las fechas no estén vacías para tipos que las requieren
     if (!['semanaAM', 'semanaPM'].includes(noveltyType) && datesList.length === 0) {
       throw new HTTPException(400, { message: 'Debe seleccionar al menos una fecha para este tipo de solicitud' });
     }
-    
+
     // Los archivos ya no son requeridos para citas médicas o audiencias
     // Comentado porque ya no es necesario adjuntar archivos
     /*
@@ -217,29 +217,31 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
       });
     }
     */
-    
+
     // Validar hora para tipos que la requieren
     if ((noveltyType === 'cita' || noveltyType === 'audiencia') && !time) {
-      throw new HTTPException(400, { 
-        message: `Debe indicar la hora de la ${noveltyType === 'cita' ? 'cita' : 'audiencia'}.` 
+      throw new HTTPException(400, {
+        message: `Debe indicar la hora de la ${noveltyType === 'cita' ? 'cita' : 'audiencia'}.`
       });
     }
-    
-    // Validar descripción para tipos que la requieren
+
+    // Validación de descripción removida a petición del usuario
+    /*
     if ((noveltyType === 'licencia' || noveltyType === 'descanso') && !description?.trim()) {
       throw new HTTPException(400, { 
         message: `Debe proporcionar una descripción para la ${noveltyType === 'licencia' ? 'licencia' : 'descanso'}.` 
       });
     }
-    
+    */
+
     const savedFiles: FileUpload[] = [];
     const fileErrors: string[] = [];
     let requestDirectory: string | null = null;
-    
+
     // Procesar archivos si existen
     if (files && files.length > 0) {
       logger.info({ fileCount: files.length }, 'Procesando archivos');
-      
+
       // Crear estructura de directorios profesional usando el ID temporal
       const tempRequestId = `temp_${Date.now()}`;
       try {
@@ -248,11 +250,11 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
         logger.error({ error }, 'Error creando directorio de solicitud');
         throw new HTTPException(500, { message: 'Error creando estructura de directorios' });
       }
-      
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const metadata = fileMetadata[i] || {};
-        
+
         // Validar archivo
         const validationError = validateFile(file);
         if (validationError) {
@@ -260,11 +262,11 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
           logger.warn({ fileName: file.name, error: validationError }, 'Archivo rechazado por validación');
           continue;
         }
-        
+
         // Generar nombre profesional para el archivo
         const fileName = generateFileName(file.name, currentUser.code, noveltyType, i);
         const filePath = path.join(requestDirectory, fileName);
-        
+
         try {
           // Guardar archivo en la estructura profesional
           logger.info({ fileName: file.name, filePath, fileSize: file.size }, 'Iniciando guardado de archivo');
@@ -272,7 +274,7 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
           const buffer = Buffer.from(arrayBuffer);
           await fs.writeFile(filePath, buffer);
           logger.info({ fileName: file.name, filePath, bufferSize: buffer.length }, 'Archivo escrito exitosamente');
-          
+
           // Crear objeto de archivo con metadatos y ruta relativa
           const relativePath = getRelativeFilePath(filePath);
           const fileInfo: FileUpload = {
@@ -291,22 +293,22 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
               relativePath: relativePath
             }
           };
-          
+
           savedFiles.push(fileInfo);
-          
-          logger.info({ 
-            fileName: file.name, 
-            savedAs: fileName, 
+
+          logger.info({
+            fileName: file.name,
+            savedAs: fileName,
             size: formatFileSize(file.size),
             relativePath: relativePath
           }, 'Archivo guardado exitosamente en estructura profesional');
-          
+
         } catch (error) {
-          logger.error({ 
-            fileName: file.name, 
-            error: error instanceof Error ? error.message : String(error) 
+          logger.error({
+            fileName: file.name,
+            error: error instanceof Error ? error.message : String(error)
           }, 'Error guardando archivo');
-          
+
           // Limpieza en caso de error de escritura
           if (requestDirectory) {
             try {
@@ -319,35 +321,35 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
         }
       }
     }
-    
+
     // Si hay errores de archivos, reportarlos
     if (fileErrors.length > 0) {
       logger.warn({ fileErrors }, 'Archivos con errores detectados');
     }
-    
+
     // Preparar datos para la base de datos
     const filesData = savedFiles.length > 0 ? JSON.stringify(savedFiles) : null;
     const filesSummaryData = filesSummary ? JSON.parse(filesSummary) : null;
-    
+
     // Preparar arrays de nombres y URLs de archivos
     const fileNames = savedFiles.length > 0 ? JSON.stringify(savedFiles.map(f => f.fileName)) : null;
     const fileUrls = savedFiles.length > 0 ? JSON.stringify(savedFiles.map(f => f.fileUrl)) : null;
-    
+
     // Determinar el tipo de usuario
     const userType = currentUser.userType || 'registered';
-    
+
     // Determinar el estado inicial basado en el flag autoApprove
     const initialStatus = (autoApprove === 'true') ? 'approved' : 'pending';
-    
+
     // Log para rastrear auto-aprobación
     if (autoApprove === 'true') {
-      logger.info({ 
-        userCode: currentUser.code, 
+      logger.info({
+        userCode: currentUser.code,
         noveltyType,
-        autoApprove: true 
+        autoApprove: true
       }, 'Solicitud marcada para auto-aprobación desde panel administrativo');
     }
-    
+
     // Insertar en la base de datos con todos los datos de archivos incluyendo userType
     const result = await executeQuery(
       `INSERT INTO permit_perms 
@@ -373,15 +375,15 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
       ],
       { commit: true }
     );
-    
+
     const requestId = (result as any).insertId;
-    
+
     // Si hay archivos, renombrar el directorio temporal con el ID real y actualizar la base de datos
     if (savedFiles.length > 0 && requestDirectory) {
       try {
         // Crear el directorio final con el ID real
         const finalRequestDirectory = await createRequestDirectory(currentUser.code, requestId.toString(), noveltyType);
-        
+
         // Mover archivos del directorio temporal al final
         const updatedFiles: FileUpload[] = [];
         for (let i = 0; i < savedFiles.length; i++) {
@@ -389,10 +391,10 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
           const oldPath = path.join(requestDirectory, file.fileName);
           const newFileName = generateFileName(file.originalName, currentUser.code, noveltyType, i);
           const newPath = path.join(finalRequestDirectory, newFileName);
-          
+
           // Mover archivo
           await fs.rename(oldPath, newPath);
-          
+
           // Actualizar información del archivo
           const relativePath = getRelativeFilePath(newPath);
           const updatedFile: FileUpload = {
@@ -408,14 +410,14 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
           };
           updatedFiles.push(updatedFile);
         }
-        
+
         // Eliminar directorio temporal
         try {
           await fs.rm(requestDirectory, { recursive: true, force: true });
         } catch (cleanupError) {
           logger.warn({ cleanupError }, 'Error eliminando directorio temporal');
         }
-        
+
         // Actualizar base de datos con información correcta de archivos
         const filesData = JSON.stringify(updatedFiles);
         await executeQuery(
@@ -434,23 +436,23 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
           ],
           { commit: true }
         );
-        
+
         // Actualizar array para respuesta
         savedFiles.length = 0;
         savedFiles.push(...updatedFiles);
-        
-        logger.info({ 
-          requestId, 
-          fileCount: updatedFiles.length, 
-          finalDirectory: finalRequestDirectory 
+
+        logger.info({
+          requestId,
+          fileCount: updatedFiles.length,
+          finalDirectory: finalRequestDirectory
         }, 'Archivos organizados en estructura profesional final');
-        
+
       } catch (error) {
-        logger.error({ 
-          requestId, 
-          error: error instanceof Error ? error.message : String(error) 
+        logger.error({
+          requestId,
+          error: error instanceof Error ? error.message : String(error)
         }, 'Error organizando archivos en estructura final');
-        
+
         // En caso de error, limpiar directorio temporal
         if (requestDirectory) {
           try {
@@ -462,18 +464,18 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
         throw new HTTPException(500, { message: 'Error organizando archivos en estructura final' });
       }
     }
-    
+
     const processingTime = Date.now() - startTime;
-    
-    logger.info({ 
-      userCode: currentUser.code, 
+
+    logger.info({
+      userCode: currentUser.code,
       requestId,
       noveltyType,
       dateCount: datesList.length,
       fileCount: savedFiles.length,
       processingTime: `${processingTime}ms`
     }, 'Solicitud de permiso creada exitosamente');
-    
+
     // Respuesta detallada
     return c.json({
       success: true,
@@ -495,29 +497,29 @@ permits.post('/permit-request', getCurrentUser, async (c) => {
         status: initialStatus,
         createdAt: new Date().toISOString()
       },
-             summary: {
-         totalFiles: savedFiles.length,
-         totalSize: savedFiles.reduce((sum, f) => sum + (f.size || 0), 0),
-         fileErrors: fileErrors.length,
-         processingTime: `${processingTime}ms`
-       }
+      summary: {
+        totalFiles: savedFiles.length,
+        totalSize: savedFiles.reduce((sum, f) => sum + (f.size || 0), 0),
+        fileErrors: fileErrors.length,
+        processingTime: `${processingTime}ms`
+      }
     });
-    
+
   } catch (dbError) {
-    logger.error({ 
+    logger.error({
       userCode: currentUser.code,
       error: dbError instanceof Error ? dbError.message : String(dbError),
       stack: dbError instanceof Error ? dbError.stack : undefined
     }, 'Error en base de datos al crear solicitud');
-    
+
     // Si es un error de HTTPException, re-lanzarlo
     if (dbError instanceof HTTPException) {
       throw dbError;
     }
-    
+
     // Para otros errores, lanzar error genérico
-    throw new HTTPException(500, { 
-      message: 'Error interno del servidor al procesar la solicitud' 
+    throw new HTTPException(500, {
+      message: 'Error interno del servidor al procesar la solicitud'
     });
   }
 });
@@ -527,10 +529,10 @@ permits.post('/new-permit-request', getCurrentUser, async (c) => {
   const currentUser = c.get('currentUser') as User;
   const body = await c.req.json();
   const request: PermitRequest2Input = validateWithZod(PermitRequest2Schema, body);
-  
+
   // Determinar el tipo de usuario
   const userType = currentUser.userType || 'registered';
-  
+
   // Insertar en la base de datos incluyendo userType
   const result = await executeQuery(
     `INSERT INTO permit_perms 
@@ -550,12 +552,12 @@ permits.post('/new-permit-request', getCurrentUser, async (c) => {
     ],
     { commit: true }
   );
-  
-  logger.info({ 
-    userCode: request.code, 
-    requestId: (result as any).insertId 
+
+  logger.info({
+    userCode: request.code,
+    requestId: (result as any).insertId
   }, 'Solicitud de permiso sin archivos creada');
-  
+
   return c.json({
     message: 'Solicitud de permiso creada exitosamente',
     id: (result as any).insertId
@@ -565,48 +567,48 @@ permits.post('/new-permit-request', getCurrentUser, async (c) => {
 // GET /files/{*path} - Servir archivos con estructura profesional (MEJORADO)
 permits.get('/files/*', async (c) => {
   const filePath = c.req.param('*');
-  
+
   if (!filePath) {
     throw new HTTPException(400, { message: 'Ruta de archivo requerida' });
   }
-  
+
   // Validar que la ruta no contenga caracteres peligrosos
   if (filePath.includes('..')) {
     throw new HTTPException(400, { message: 'Ruta de archivo inválida' });
   }
-  
+
   // Normalizar la ruta para Windows
   const normalizedPath = filePath.replace(/\//g, path.sep);
   const fullFilePath = path.join(UPLOAD_DIR, normalizedPath);
-  
+
   try {
     // Verificar que el archivo existe y está dentro del directorio de uploads
     const resolvedPath = path.resolve(fullFilePath);
     const uploadDirResolved = path.resolve(UPLOAD_DIR);
-    
+
     if (!resolvedPath.startsWith(uploadDirResolved)) {
       throw new HTTPException(403, { message: 'Acceso denegado' });
     }
-    
+
     const stats = await fs.stat(resolvedPath);
-    
+
     // Verificar que es un archivo (no un directorio)
     if (!stats.isFile()) {
       throw new HTTPException(404, { message: 'Archivo no encontrado' });
     }
-    
+
     // Leer archivo y enviarlo como stream
     const fileBuffer = await fs.readFile(resolvedPath);
     const filename = path.basename(resolvedPath);
     const mimeType = getMimeType(filename);
-    
-    logger.info({ 
-      filePath, 
+
+    logger.info({
+      filePath,
       resolvedPath,
       size: formatFileSize(fileBuffer.length),
-      mimeType 
+      mimeType
     }, 'Archivo servido exitosamente desde estructura profesional');
-    
+
     return new Response(fileBuffer, {
       headers: {
         'Content-Type': mimeType,
@@ -615,18 +617,18 @@ permits.get('/files/*', async (c) => {
         'Content-Disposition': `inline; filename="${filename}"`
       }
     });
-    
+
   } catch (error) {
     if (error instanceof HTTPException) {
       throw error;
     }
-    
-    logger.error({ 
-      filePath, 
+
+    logger.error({
+      filePath,
       fullFilePath,
-      error: error instanceof Error ? error.message : String(error) 
+      error: error instanceof Error ? error.message : String(error)
     }, 'Error sirviendo archivo desde estructura profesional');
-    
+
     throw new HTTPException(404, { message: 'Archivo no encontrado' });
   }
 });
@@ -636,29 +638,29 @@ permits.post('/check-existing-requests', getCurrentUser, async (c) => {
   const currentUser = c.get('currentUser') as User;
   const body = await c.req.json();
   const { dates }: DateCheckInput = validateWithZod(DateCheckSchema, body);
-  
+
   // Obtener rango de fechas (miércoles a miércoles)
   const today = new Date();
   const lastWednesday = new Date(today);
   lastWednesday.setDate(today.getDate() - ((today.getDay() + 4) % 7));
-  
+
   const nextWednesday = new Date(lastWednesday);
   nextWednesday.setDate(lastWednesday.getDate() + 7);
-  
+
   // Filtrar fechas dentro del rango
   const checkDates = dates.map(date => new Date(date));
-  const filteredDates = checkDates.filter(date => 
+  const filteredDates = checkDates.filter(date =>
     date >= lastWednesday && date < nextWednesday
   );
-  
+
   if (filteredDates.length === 0) {
     return c.json({ hasExistingRequest: false });
   }
-  
+
   // Verificar solicitudes existentes
   const dateStrings = filteredDates.map(date => date.toISOString().split('T')[0]);
   const placeholders = dateStrings.map(() => '?').join(',');
-  
+
   const result = await executeQuery<{ count: number }>(
     `SELECT COUNT(*) as count 
      FROM permit_perms 
@@ -666,7 +668,7 @@ permits.post('/check-existing-requests', getCurrentUser, async (c) => {
     [currentUser.code, ...dateStrings],
     { fetchOne: true }
   );
-  
+
   return c.json({ hasExistingRequest: (result?.count || 0) > 0 });
 });
 
@@ -675,14 +677,14 @@ permits.post('/check-existing-permits', getCurrentUser, async (c) => {
   const currentUser = c.get('currentUser') as User;
   const body = await c.req.json();
   const { dates, noveltyType }: { dates: string[], noveltyType: string } = body;
-  
+
   if (!dates || dates.length === 0 || !noveltyType) {
     return c.json({ hasExistingPermit: false, existingDates: [] });
   }
-  
+
   try {
     const dateStrings = dates.map(date => new Date(date).toISOString().split('T')[0]);
-    
+
     // Traer todas las filas del usuario con ese tipo de novedad
     const result = await executeQuery<any[]>(
       `SELECT fecha, tipo_novedad, solicitud FROM permit_perms 
@@ -698,11 +700,11 @@ permits.post('/check-existing-permits', getCurrentUser, async (c) => {
         existingDates.push(...fechas.filter((f: string) => dateStrings.includes(f)));
       }
     }
-    
+
     // Eliminar duplicados
     existingDates = [...new Set(existingDates)];
 
-    logger.info({ 
+    logger.info({
       userCode: currentUser.code,
       noveltyType,
       checkDates: dateStrings,
@@ -716,15 +718,15 @@ permits.post('/check-existing-permits', getCurrentUser, async (c) => {
       checkedDates: dateStrings,
       noveltyType
     });
-    
+
   } catch (error) {
-    logger.error({ 
+    logger.error({
       userCode: currentUser.code,
       error: error instanceof Error ? error.message : String(error)
     }, 'Error verificando permisos existentes');
-    
-    throw new HTTPException(500, { 
-      message: 'Error al verificar permisos existentes' 
+
+    throw new HTTPException(500, {
+      message: 'Error al verificar permisos existentes'
     });
   }
 });
@@ -732,22 +734,22 @@ permits.post('/check-existing-permits', getCurrentUser, async (c) => {
 // GET /permit-request/{id} - Obtener solicitud específica (MEJORADO)
 permits.get('/permit-request/:id', async (c) => {
   const id = parseInt(c.req.param('id') || '0', 10);
-  
+
   if (!id) {
     throw new HTTPException(400, { message: 'ID de solicitud requerido' });
   }
-  
+
   try {
     const request = await executeQuery(
       'SELECT * FROM permit_perms WHERE id = ?',
       [id],
       { fetchOne: true }
     );
-    
+
     if (!request) {
       throw new HTTPException(404, { message: 'Solicitud no encontrada' });
     }
-    
+
     // Procesar archivos si existen
     if (request.files) {
       try {
@@ -757,7 +759,7 @@ permits.get('/permit-request/:id', async (c) => {
         request.files = [];
       }
     }
-    
+
     // Procesar metadatos si existen
     if (request.files_metadata) {
       try {
@@ -767,7 +769,7 @@ permits.get('/permit-request/:id', async (c) => {
         request.files_metadata = null;
       }
     }
-    
+
     // Procesar resumen si existe
     if (request.files_summary) {
       try {
@@ -777,23 +779,23 @@ permits.get('/permit-request/:id', async (c) => {
         request.files_summary = null;
       }
     }
-    
+
     logger.info({ requestId: id }, 'Solicitud obtenida exitosamente');
-    
+
     return c.json(request);
-    
+
   } catch (error) {
     if (error instanceof HTTPException) {
       throw error;
     }
-    
-    logger.error({ 
+
+    logger.error({
       requestId: id,
       error: error instanceof Error ? error.message : String(error)
     }, 'Error obteniendo solicitud');
-    
-    throw new HTTPException(500, { 
-      message: 'Error interno del servidor al obtener la solicitud' 
+
+    throw new HTTPException(500, {
+      message: 'Error interno del servidor al obtener la solicitud'
     });
   }
 });
@@ -807,7 +809,7 @@ function getMimeType(filename: string): string {
     '.jpeg': 'image/jpeg',
     '.png': 'image/png'
   };
-  
+
   return mimeTypes[ext] || 'application/octet-stream';
 }
 

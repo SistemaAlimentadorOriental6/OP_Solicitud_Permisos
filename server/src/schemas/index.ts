@@ -16,7 +16,7 @@ export const PermitRequestSchema = z.object({
   dates: z.array(z.string()).min(1, 'Debe seleccionar al menos una fecha'),
   noveltyType: z.string().min(1, 'El tipo de novedad es requerido'),
   time: z.string().optional(),
-  description: z.string().min(1, 'La descripción es requerida')
+  description: z.string().optional()
 });
 
 export const PermitRequest2Schema = z.object({
@@ -26,7 +26,7 @@ export const PermitRequest2Schema = z.object({
   dates: z.array(z.string()).min(1, 'Debe seleccionar al menos una fecha'),
   noveltyType: z.string().min(1, 'El tipo de novedad es requerido'),
   time: z.string().optional(),
-  description: z.string().min(1, 'La descripción es requerida')
+  description: z.string().optional()
 });
 
 export const EquipmentRequestSchema = z.object({

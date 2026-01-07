@@ -36,16 +36,16 @@ app.use('*', performanceMiddleware);
 app.use('*', rateLimiter.limit);  // Agregar rate limiter a todas las rutas
 
 // Rutas de la API - El prefijo /api es manejado por el proxy inverso (Nginx/etc)
-app.route('/api/auth', auth);
-app.route('/api/admin', admin);
-app.route('/api/permits', permits);
-app.route('/api/equipment', equipment);
-app.route('/api/excel', excel);
-app.route('/api/users', users);
-app.route('/api/operator', operator);
-app.route('/api/statistics', statistics);
-app.route('/api/images', images);
-app.route('/api/user-context', userContext);
+app.route('/auth', auth);
+app.route('/admin', admin);
+app.route('/permits', permits);
+app.route('/equipment', equipment);
+app.route('/excel', excel);
+app.route('/users', users);
+app.route('/operator', operator);
+app.route('/statistics', statistics);
+app.route('/images', images);
+app.route('/user-context', userContext);
 
 // Ruta raíz
 app.get('/', (c) => c.text('Servidor Hono funcionando!'));

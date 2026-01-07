@@ -182,11 +182,8 @@ export default function SolicitudPermisosPage() {
       return
     }
 
-    if (!description.trim()) {
-      // Si la descripción no es obligatoria según el usuario, 
-      // podrías dejarla así o poner un valor por defecto si la API lo requiere.
-      // Pero mantengo la validación por si acaso, o la quito si prefieres.
-    }
+    // La descripcion es opcional
+
 
     // Verificar permisos existentes
     const hasExisting = await checkExistingPermits(selectedDates, noveltyType)
