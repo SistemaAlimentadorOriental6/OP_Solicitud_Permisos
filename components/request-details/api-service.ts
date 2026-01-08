@@ -20,6 +20,7 @@ export interface HistoryItem {
     status: string
     description?: string
     requestedDates?: string
+    noveltyType?: string
     requestId?: string
     requestType?: string
 }

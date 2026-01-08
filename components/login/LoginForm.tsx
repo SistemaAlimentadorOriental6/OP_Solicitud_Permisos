@@ -64,6 +64,8 @@ const LoginForm = ({
                             <Input
                                 id="code"
                                 type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={code}
                                 onChange={(e) => {
                                     const value = e.target.value
@@ -181,6 +183,8 @@ const LoginForm = ({
                             <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="pl-6 pr-16 border-none focus-visible:ring-2 focus-visible:ring-[#4cc253] text-xl h-20 bg-gray-100/50 hover:bg-gray-100 transition-all rounded-[2rem] font-bold text-gray-800"

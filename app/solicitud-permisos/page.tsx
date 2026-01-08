@@ -309,60 +309,14 @@ export default function SolicitudPermisosPage() {
           }}
         />
 
-        {/* Bloqueo por temporada navideña - Diseño Premium Minimalista */}
-        {userData?.userType === 'registered' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="relative overflow-hidden bg-white rounded-[32px] p-8 border border-gray-100 shadow-xl shadow-gray-200/50"
-          >
-            {/* Elementos decorativos sutiles */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 opacity-50" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-50 rounded-full -ml-12 -mb-12 opacity-50" />
 
-            <div className="relative flex flex-col items-center text-center space-y-6">
-              <div className="flex -space-x-2">
-                <div className="bg-red-500 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200 rotate-[-10deg]">
-                  <span className="text-xl">🎄</span>
-                </div>
-                <div className="bg-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg border border-gray-50 z-10">
-                  <span className="text-xl">✨</span>
-                </div>
-                <div className="bg-[#4cc253] w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-green-200 rotate-[10deg]">
-                  <span className="text-xl">🎁</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Vacaciones de Navidad</h3>
-                <div className="h-1 w-12 bg-[#4cc253] mx-auto rounded-full" />
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-gray-600 font-medium leading-relaxed max-w-sm mx-auto">
-                  Te deseamos unas <span className="text-red-500 font-bold">felices fiestas</span>. Disfruta de este tiempo especial en familia con mucho amor y alegría.
-                </p>
-
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 inline-block">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Retorno de actividades</p>
-                  <p className="text-gray-900 font-black">12 de Enero, 2026</p>
-                </div>
-              </div>
-
-              <p className="text-[11px] font-bold text-gray-400 italic">
-                El sistema de solicitudes se encuentra pausado temporalmente.
-              </p>
-            </div>
-          </motion.div>
-        )}
 
         {/* Tipo de Novedad */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className={`bg-white rounded-3xl p-6 border border-gray-100 shadow-sm ${userData?.userType === 'registered' ? 'opacity-50 pointer-events-none' : ''}`}
+          className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm"
         >
           <h3 className="text-xs uppercase font-black text-gray-400 tracking-[0.2em] mb-3">
             Tipo de Novedad <span className="text-red-500">*</span>
@@ -400,7 +354,7 @@ export default function SolicitudPermisosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className={`bg-white rounded-3xl p-6 border border-gray-100 shadow-sm ${userData?.userType === 'registered' ? 'opacity-50 pointer-events-none' : ''}`}
+          className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm"
         >
           <h2 className="text-xl font-black text-gray-900 mb-6 uppercase tracking-tighter">
             Selecciona las Fechas <span className="text-red-500">*</span>
@@ -418,7 +372,7 @@ export default function SolicitudPermisosPage() {
                 <button
                   key={dateInfo.formattedDate}
                   onClick={() => handleDateSelect(dateInfo.formattedDate)}
-                  disabled={isAlreadyRequested || userData?.userType === 'registered'}
+                  disabled={isAlreadyRequested}
                   className={`
                     py-3 px-1 md:py-4 rounded-2xl border-2 transition-all relative overflow-hidden min-w-[70px]
                     ${isSelected
@@ -483,7 +437,7 @@ export default function SolicitudPermisosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className={`bg-white rounded-3xl p-6 border border-gray-100 shadow-sm ${userData?.userType === 'registered' ? 'opacity-50 pointer-events-none' : ''}`}
+          className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm"
         >
           <h2 className="text-xl font-black text-gray-900 mb-4 uppercase tracking-tighter">
             Descripción
@@ -491,7 +445,7 @@ export default function SolicitudPermisosPage() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            disabled={userData?.userType === 'registered'}
+            disabled={false}
             placeholder="Describe el motivo de tu solicitud..."
             className="w-full min-h-[150px] p-4 border border-gray-100 rounded-2xl focus:border-[#4cc253] focus:ring-2 focus:ring-[#4cc253]/20 resize-none"
           />
@@ -500,10 +454,10 @@ export default function SolicitudPermisosPage() {
         {/* Botón de envío */}
         <button
           onClick={handleSubmit}
-          disabled={submitState.isSubmitting || !noveltyType || selectedDates.length === 0 || userData?.userType === 'registered'}
+          disabled={submitState.isSubmitting || !noveltyType || selectedDates.length === 0}
           className="w-full h-14 rounded-2xl bg-[#4cc253] hover:bg-[#3da343] text-white font-black uppercase tracking-widest text-xs shadow-lg disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed transition-all"
         >
-          {userData?.userType === 'registered' ? "Sistema no disponible" : (submitState.isSubmitting ? "Enviando..." : "Enviar Solicitud")}
+          {submitState.isSubmitting ? "Enviando..." : "Enviar Solicitud"}
         </button>
       </div>
 

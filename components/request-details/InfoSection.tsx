@@ -8,6 +8,9 @@ import {
     Calendar as CalendarIcon,
     Clock,
     MessageSquare,
+    Users,
+    MapPin,
+    Briefcase,
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -92,12 +95,67 @@ export const InfoSection = React.memo<InfoSectionProps>(
                                 <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
                                     <Clock className="w-4 h-4 text-gray-400" />
                                 </div>
-                                <div>
+                                <div className="min-w-0">
                                     <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Hora Solicitud</p>
-                                    <p className="font-bold text-gray-900">{request?.time || "--"}</p>
+                                    <p className="font-bold text-gray-900 truncate">{request?.time || "--"}</p>
                                 </div>
                             </div>
+
+                            <div className="flex items-center space-x-4">
+                                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                    <MapPin className="w-4 h-4 text-gray-400" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Zona / Ubicación</p>
+                                    <p className="font-bold text-gray-900 truncate">{request?.zona || "--"}</p>
+                                </div>
+                            </div>
+
+                            {((request as any).Turno || request?.shift) && (
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                        <Briefcase className="w-4 h-4 text-gray-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Turno Pedido</p>
+                                        <p className="font-bold text-gray-900 truncate">{(request as any).Turno || request?.shift}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Información de Pareja (Si aplica) */}
+                        {(request?.type?.toLowerCase().includes('turno pareja') || (request as any)?.noveltyType?.toLowerCase().includes('turno pareja')) && (
+                            <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <h4 className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-4">
+                                    Información de Turno Pareja
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {((request as any).comp_am || request.codeAM) && (
+                                        <div className="flex items-center space-x-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100/50 group hover:border-[#4cc253]/30 transition-all">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 shadow-sm group-hover:scale-110 transition-transform">
+                                                <Users className="w-5 h-5 text-[#4cc253]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest leading-none mb-1">Pareja AM</p>
+                                                <p className="font-bold text-gray-900">{(request as any).comp_am || request.codeAM}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {((request as any).comp_pm || request.codePM) && (
+                                        <div className="flex items-center space-x-4 bg-gray-50/50 p-5 rounded-2xl border border-gray-100/50 group hover:border-[#4cc253]/30 transition-all">
+                                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 shadow-sm group-hover:scale-110 transition-transform">
+                                                <Users className="w-5 h-5 text-[#4cc253]" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest leading-none mb-1">Pareja PM</p>
+                                                <p className="font-bold text-gray-900">{(request as any).comp_pm || request.codePM}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Rango de Fechas Solicitadas */}
                         <div className="mb-8">

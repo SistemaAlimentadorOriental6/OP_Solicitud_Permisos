@@ -143,7 +143,7 @@ const UserAvatar = memo(({ name, photoUrl, size = "md", showStatus = true }: {
 
   return (
     <div className={`relative ${sizeClasses[size]} flex-shrink-0`}>
-      <div className={`w-full h-full rounded-full overflow-hidden border border-green-100 bg-white shadow-sm transition-all duration-300 group-hover:border-[#4cc253]`}>
+      <div className={`w-full h-full rounded-2xl overflow-hidden border-2 border-gray-100 bg-white shadow-sm transition-all duration-300 group-hover:border-[#4cc253]/50`}>
         {photoUrl && !imageError ? (
           <img
             src={photoUrl}
@@ -154,14 +154,14 @@ const UserAvatar = memo(({ name, photoUrl, size = "md", showStatus = true }: {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-green-50 text-green-700 font-bold italic">
+          <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400 font-black text-xs italic">
             {initials}
           </div>
         )}
       </div>
 
       {showStatus && (
-        <span className="absolute bottom-0.5 right-0.5 block h-2.5 w-2.5 rounded-full bg-[#4cc253] ring-2 ring-white shadow-sm" />
+        <span className="absolute -bottom-1 -right-1 block h-3 w-3 rounded-full bg-[#4cc253] ring-2 ring-white shadow-sm" />
       )}
     </div>
   )
@@ -173,38 +173,40 @@ UserAvatar.displayName = "UserAvatar"
 const StatusBadge = memo(({ status, size = "sm" }: { status: string; size?: "xs" | "sm" | "md" }) => {
   const getStatusConfig = (status: string) => {
     switch (status.toLowerCase()) {
+      case 'approved':
       case 'aprobado':
         return {
-          icon: CheckCircle2,
-          color: 'bg-[#4cc253] text-white border-[#4cc253]',
+          color: 'bg-[#4cc253] text-white',
+          text: 'Aprobado'
         }
+      case 'cancelled':
       case 'rechazado':
+      case 'rejected':
         return {
-          icon: XCircle,
-          color: 'bg-white text-green-900 border-green-200',
+          color: 'bg-red-500 text-white',
+          text: 'Rechazado'
         }
+      case 'pending':
       case 'pendiente':
       default:
         return {
-          icon: Clock,
-          color: 'bg-green-50 text-green-700 border-green-100',
+          color: 'bg-amber-500 text-white',
+          text: 'Pendiente'
         }
     }
   }
 
   const sizeClasses = {
-    xs: 'px-2 py-0.5 text-[10px]',
-    sm: 'px-2.5 py-1 text-xs',
-    md: 'px-3 py-1.5 text-sm'
+    xs: 'px-2 py-0.5 text-[9px]',
+    sm: 'px-2.5 py-1 text-[10px]',
+    md: 'px-3 py-1.5 text-xs'
   }
 
   const config = getStatusConfig(status)
-  const IconComponent = config.icon
 
   return (
-    <div className={`inline-flex items-center gap-1.5 rounded-full border ${config.color} ${sizeClasses[size]} font-semibold shadow-sm transition-all hover:scale-105`}>
-      <IconComponent className="h-3 w-3" />
-      <span className="capitalize">{status}</span>
+    <div className={`inline-flex items-center rounded-full ${config.color} ${sizeClasses[size]} font-black uppercase tracking-wider shadow-sm transition-all`}>
+      <span>{config.text}</span>
     </div>
   )
 })
@@ -220,37 +222,29 @@ const RequestStats = memo(({ requests }: { requests: Request[] }) => {
       return acc
     }, {} as Record<string, number>)
 
-    const byStatus = requests.reduce((acc, req) => {
-      const status = req.status || 'pendiente'
-      acc[status] = (acc[status] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-
-    return { total, byType, byStatus }
+    return { total, byTypeCount: Object.keys(byType).length }
   }, [requests])
 
   return (
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-4 rounded-2xl border-2 border-emerald-200">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="p-2 bg-emerald-100 rounded-xl">
-            <BarChart3 className="h-4 w-4 text-emerald-600" />
-          </div>
-          <h4 className="font-semibold text-emerald-800">Total</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-6 group hover:border-[#4cc253]/30 transition-all">
+        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-[#4cc253]/10 transition-colors">
+          <BarChart3 className="h-8 w-8 text-[#4cc253]" />
         </div>
-        <p className="text-2xl font-bold text-emerald-900">{stats.total}</p>
-        <p className="text-sm text-emerald-600">Solicitudes</p>
+        <div>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Solicitudes</p>
+          <p className="text-4xl font-black text-gray-900 tracking-tight">{stats.total}</p>
+        </div>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-2xl border-2 border-blue-200">
-        <div className="flex items-center space-x-3 mb-3">
-          <div className="p-2 bg-blue-100 rounded-xl">
-            <PieChart className="h-4 w-4 text-blue-600" />
-          </div>
-          <h4 className="font-semibold text-blue-800">Tipos</h4>
+      <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-6 group hover:border-[#4cc253]/30 transition-all">
+        <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-[#4cc253]/10 transition-colors">
+          <PieChart className="h-8 w-8 text-[#4cc253]" />
         </div>
-        <p className="text-2xl font-bold text-blue-900">{Object.keys(stats.byType).length}</p>
-        <p className="text-sm text-blue-600">Diferentes</p>
+        <div>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Tipos Diferentes</p>
+          <p className="text-4xl font-black text-gray-900 tracking-tight">{stats.byTypeCount}</p>
+        </div>
       </div>
     </div>
   )
@@ -277,52 +271,94 @@ const DetailedRequestItem = memo(({
   return (
     <motion.div
       layout
-      className={`group relative flex flex-col gap-3 rounded-xl border p-4 transition-all duration-300 cursor-pointer ${isSelected
-          ? 'border-[#4cc253] bg-green-50/50 shadow-md ring-1 ring-green-500/10'
-          : 'border-green-100 bg-white hover:border-[#4cc253] hover:shadow-soft'
+      className={`group/inner relative flex flex-col gap-6 rounded-[2rem] border p-6 transition-all duration-500 cursor-pointer ${isSelected
+        ? 'border-[#4cc253] bg-[#4cc253]/5 shadow-lg ring-1 ring-[#4cc253]/10'
+        : 'border-gray-100 bg-white hover:border-[#4cc253]/30 hover:shadow-xl'
         }`}
       onClick={() => onRequestClick(request)}
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg border border-green-100 bg-green-50 text-[#4cc253]`}>
-            <FileText className="h-4 w-4" />
+        <div className="flex items-center gap-4">
+          <div className={`p-4 rounded-2xl bg-gray-50 text-[#4cc253] border border-gray-100 group-hover/inner:bg-[#4cc253] group-hover/inner:text-white transition-all duration-300`}>
+            <FileText className="h-6 w-6" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-green-950 leading-tight">{request.type}</h4>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">ID: {request.code}</span>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Tipo de Novedad</p>
+            <h4 className="text-lg font-black text-gray-900 tracking-tight capitalize">{request.type}</h4>
+            <span className="text-[10px] font-black uppercase tracking-tighter text-gray-400">ID: {request.code}</span>
           </div>
         </div>
-        <StatusBadge status={request.status || 'pendiente'} size="xs" />
+        <StatusBadge status={request.status || 'pendiente'} size="sm" />
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-green-800/70">
-        <div className="flex items-center gap-1.5">
-          <Calendar className="h-3.5 w-3.5 text-[#4cc253]" />
-          <span>
-            {request.dates
-              ? Array.isArray(request.dates)
-                ? request.dates.length > 1
-                  ? `${formatDateForCard(request.dates[0])} - ${formatDateForCard(request.dates[request.dates.length - 1])}`
-                  : formatDateForCard(request.dates[0])
-                : formatDateForCard(request.dates.toString())
-              : "Sin fecha definida"}
-          </span>
-        </div>
-        {request.zona && (
-          <div className="flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-[#4cc253]" />
-            <span>{request.zona}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+            <Calendar className="h-4 w-4 text-[#4cc253]" />
           </div>
+          <div>
+            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Fecha Solicitada</p>
+            <p className="text-sm font-bold text-gray-800 mt-0.5">
+              {request.dates
+                ? Array.isArray(request.dates)
+                  ? request.dates.length > 1
+                    ? `${formatDateForCard(request.dates[0])} - ${formatDateForCard(request.dates[request.dates.length - 1])}`
+                    : formatDateForCard(request.dates[0])
+                  : formatDateForCard(request.dates.toString())
+                : "Sin fecha"}
+            </p>
+          </div>
+        </div>
+
+        {request.zona && (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+              <MapPin className="h-4 w-4 text-[#4cc253]" />
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Zona / Ubicación</p>
+              <p className="text-sm font-bold text-gray-800 mt-0.5">{request.zona}</p>
+            </div>
+          </div>
+        )}
+
+        {(request.type?.toLowerCase().includes('turno pareja') || (request as any).noveltyType?.toLowerCase().includes('turno pareja')) && (
+          <>
+            {(request.comp_am || (request as any).codeAM) && (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                  <User className="h-4 w-4 text-[#4cc253]" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Pareja AM</p>
+                  <p className="text-sm font-bold text-gray-800 mt-0.5">{request.comp_am || (request as any).codeAM}</p>
+                </div>
+              </div>
+            )}
+            {(request.comp_pm || (request as any).codePM) && (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                  <User className="h-4 w-4 text-[#4cc253]" />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Pareja PM</p>
+                  <p className="text-sm font-bold text-gray-800 mt-0.5">{request.comp_pm || (request as any).codePM}</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-green-50 opacity-0 transition-opacity group-hover:opacity-100">
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-green-400 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); onEdit(request); }}>
-          <Edit className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-green-400 hover:text-red-900 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); onDelete(request); }}>
-          <Trash2 className="h-4 w-4" />
+      <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-10 px-4 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 font-bold"
+          onClick={(e) => { e.stopPropagation(); onDelete(request); }}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Eliminar
         </Button>
       </div>
     </motion.div>
@@ -418,31 +454,36 @@ const DetailedViewModal = memo(({
         style={{ zIndex: 99999, position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh' }}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 50 }}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 50 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden"
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="bg-gray-50 rounded-[3rem] shadow-2xl max-w-6xl w-full max-h-[92vh] overflow-hidden border border-white"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-emerald-600 p-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500 rounded-full blur-3xl opacity-50"></div>
+          <div className="bg-[#4cc253] p-10 relative overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10 mix-blend-overlay">
+              <div className="absolute inset-0 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
+            </div>
 
             <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center space-x-6">
-                <div className="p-1 bg-white rounded-full shadow-lg">
-                  <UserAvatar name={name} size="lg" showStatus={false} />
+              <div className="flex items-center space-x-8">
+                <div className="p-1 bg-white/20 backdrop-blur-md rounded-[2rem] shadow-xl border border-white/30">
+                  <UserAvatar name={name} size="xl" showStatus={false} />
                 </div>
-                <div className="text-white">
-                  <h2 className="text-4xl font-black tracking-tight drop-shadow-md">{name}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="px-2 py-0.5 bg-emerald-500 rounded-md text-[10px] font-black uppercase tracking-widest border border-emerald-400">
+                <div>
+                  <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tight leading-none mb-3 drop-shadow-sm">
+                    {name}
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <div className="px-3 py-1 bg-white text-[#4cc253] rounded-full text-[10px] font-black uppercase tracking-widest shadow-md">
                       Empleado Activo
                     </div>
-                    <p className="text-emerald-50 text-sm font-bold opacity-90">
-                      • {requests.length} solicitud{requests.length !== 1 ? "es" : ""} registrada{requests.length !== 1 ? "s" : ""}
+                    <div className="h-1.5 w-1.5 rounded-full bg-white/50" />
+                    <p className="text-white/90 text-sm font-bold tracking-tight">
+                      {requests.length} solicitud{requests.length !== 1 ? "es" : ""} registrada{requests.length !== 1 ? "s" : ""}
                     </p>
                   </div>
                 </div>
@@ -450,55 +491,60 @@ const DetailedViewModal = memo(({
               <Button
                 onClick={onClose}
                 variant="ghost"
-                className="text-white hover:bg-white/20 rounded-full h-12 w-12 p-0"
+                className="text-white hover:bg-white/20 rounded-2xl h-14 w-14 p-0 backdrop-blur-sm transition-all hover:rotate-90"
               >
-                <X className="h-6 w-6" />
+                <X className="h-8 w-8" />
               </Button>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <div className="p-10 overflow-y-auto max-h-[calc(92vh-220px)] space-y-10">
             {/* Statistics */}
             <RequestStats requests={requests} />
 
             {/* Controls */}
-            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+            <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 relative group">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-emerald-400 h-5 w-5 transition-colors group-focus-within:text-emerald-600" />
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 h-6 w-6 transition-all group-focus-within:text-[#4cc253]" />
                 <Input
                   placeholder="Buscar por tipo, código o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 border-emerald-100 focus:border-emerald-500 rounded-xl bg-emerald-50/10 font-medium"
+                  className="pl-16 h-16 border-gray-100 focus:border-[#4cc253]/30 focus:ring-4 focus:ring-[#4cc253]/10 rounded-[2rem] bg-white font-bold text-gray-800 transition-all text-lg shadow-sm"
                 />
               </div>
 
-              <div className="flex gap-3">
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="px-4 h-12 border border-emerald-100 rounded-xl focus:border-emerald-500 focus:outline-none bg-white font-bold text-emerald-800 shadow-sm cursor-pointer"
-                >
-                  <option value="all">Filtro: Todos</option>
-                  {uniqueTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
+              <div className="flex gap-4">
+                <div className="relative">
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="appearance-none pl-6 pr-12 h-16 border border-gray-100 rounded-[2rem] focus:border-[#4cc253]/30 focus:ring-4 focus:ring-[#4cc253]/10 bg-white font-black text-[10px] uppercase tracking-[0.2em] text-gray-500 shadow-sm cursor-pointer transition-all min-w-[200px]"
+                  >
+                    <option value="all">Filtro: Todos</option>
+                    {uniqueTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                </div>
 
                 <Button
                   onClick={handleSelectAll}
                   variant="outline"
-                  className="h-12 px-6 border-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white rounded-xl font-bold transition-all shadow-sm"
+                  className={`h-16 px-8 rounded-[2rem] font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-sm ${selectedRequests.size === paginatedRequests.length
+                    ? 'bg-[#4cc253] text-white border-[#4cc253] hover:bg-[#3da343]'
+                    : 'bg-white text-gray-500 border-gray-100 hover:border-[#4cc253]/30 hover:text-[#4cc253]'
+                    }`}
                 >
                   {selectedRequests.size === paginatedRequests.length ? (
                     <>
-                      <Minus className="h-4 w-4 mr-2" />
+                      <Minus className="h-4 w-4 mr-3" />
                       Deseleccionar
                     </>
                   ) : (
                     <>
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-3" />
                       Selección Múltiple
                     </>
                   )}
@@ -610,64 +656,108 @@ const RequestCard = memo(
           >
             <ContextMenu>
               <ContextMenuTrigger>
-                <Card className={`relative h-full overflow-hidden border-green-100 bg-white shadow-soft transition-all duration-300 hover:border-[#4cc253] hover:shadow-xl ${hasSelectedRequests ? 'ring-2 ring-[#4cc253] border-[#4cc253] bg-green-50/20' : ''}`}>
+                <Card className={`relative h-full overflow-hidden border-gray-100 bg-white shadow-sm transition-all duration-500 rounded-[2.5rem] hover:border-[#4cc253]/30 hover:shadow-xl ${hasSelectedRequests ? 'ring-2 ring-[#4cc253]/20 border-[#4cc253]/50 bg-[#4cc253]/5' : ''}`}>
                   {/* Premium Accent Bar */}
-                  <div className={`absolute left-0 top-0 h-1 w-full bg-[#4cc253] shadow-sm transition-transform duration-500 translate-y-[-100%] group-hover:translate-y-0`} />
+                  <div className={`absolute top-0 right-0 w-32 h-32 bg-[#4cc253]/5 rounded-full -mr-16 -mt-16 transition-transform duration-700 group-hover:scale-150`} />
 
                   <CardContent className="flex flex-col gap-4 p-5">
                     {/* Header: User Info & Status */}
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="flex items-center gap-4 overflow-hidden">
                         <UserAvatar name={name} size="md" />
                         <div className="flex flex-col min-w-0">
-                          <h3 className="truncate text-sm font-black text-green-950 group-hover:text-[#4cc253] transition-colors">
+                          <h3 className="truncate text-lg font-black text-gray-900 tracking-tight group-hover:text-[#4cc253] transition-colors leading-tight">
                             {name}
                           </h3>
-                          <div className={`inline-flex items-center gap-1.5 w-fit rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${isPostulacion ? 'bg-[#4cc253] text-white shadow-sm' : 'bg-green-50 text-green-700 border border-green-100'}`}>
-                            <div className={`h-1.5 w-1.5 rounded-full ${isPostulacion ? 'bg-white' : 'bg-[#4cc253]'}`} />
-                            {isPostulacion ? 'Postulación' : 'Permiso'}
+                          <div className={`inline-flex items-center gap-1.5 w-fit rounded-full px-2 py-0.5 mt-1`}>
+                            <div className={`h-1.5 w-1.5 rounded-full ${isPostulacion ? 'bg-[#4cc253] shadow-[0_0_8px_rgba(76,194,83,0.5)]' : 'bg-gray-400'}`} />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">
+                              {isPostulacion ? 'Postulación' : 'Permiso'}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <StatusBadge status="Pendiente" size="xs" />
+                      <StatusBadge status={primaryRequest.status || "pendiente"} size="xs" />
                     </div>
 
                     {/* Main Content Area */}
                     <div className="space-y-3">
                       {/* Primary Request Summary */}
                       <div
-                        className={`flex items-start gap-4 rounded-xl border border-green-50 bg-green-50/20 p-4 transition-all hover:bg-white hover:border-green-300 hover:shadow-soft cursor-pointer ${selectedRequestIds.has(primaryRequest.id) ? 'bg-white border-[#4cc253] shadow-md ring-1 ring-green-500/10' : ''}`}
+                        className={`group/inner flex items-start gap-4 rounded-3xl border border-gray-100 bg-gray-50/50 p-5 transition-all hover:bg-white hover:border-[#4cc253]/30 hover:shadow-lg cursor-pointer ${selectedRequestIds.has(primaryRequest.id) ? 'bg-white border-[#4cc253] shadow-md ring-1 ring-[#4cc253]/10' : ''}`}
                         onClick={() => onRequestClick(primaryRequest)}
                       >
-                        <div className="flex-1 min-w-0 space-y-2.5">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-green-100 text-green-700 shadow-sm">
-                              <FileText className="h-3.5 w-3.5" />
+                        <div className="flex-1 min-w-0 space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-white text-[#4cc253] shadow-sm border border-gray-100 group-hover/inner:bg-[#4cc253] group-hover/inner:text-white transition-all">
+                              <FileText className="h-4 w-4" />
                             </div>
-                            <p className="truncate text-sm font-bold text-green-900">{primaryRequest.type}</p>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Tipo de Novedad</p>
+                              <p className="truncate text-sm font-black text-gray-900">{primaryRequest.type}</p>
+                            </div>
                           </div>
 
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-green-700/70">
-                              <Calendar className="h-3.5 w-3.5 text-[#4cc253]" />
-                              <span className="truncate">
-                                {primaryRequest.dates
-                                  ? Array.isArray(primaryRequest.dates)
-                                    ? formatDateForCard(primaryRequest.dates[0])
-                                    : formatDateForCard(primaryRequest.dates.toString())
-                                  : 'Fecha pendiente'}
-                              </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center">
+                                <Calendar className="h-3.5 w-3.5 text-[#4cc253]" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Fecha</p>
+                                <p className="truncate text-xs font-bold text-gray-800 mt-0.5">
+                                  {primaryRequest.dates
+                                    ? Array.isArray(primaryRequest.dates)
+                                      ? formatDateForCard(primaryRequest.dates[0])
+                                      : formatDateForCard(primaryRequest.dates.toString())
+                                    : 'Pendiente'}
+                                </p>
+                              </div>
                             </div>
                             {primaryRequest.zona && (
-                              <div className="flex items-center gap-2 text-[11px] font-bold text-green-700/70">
-                                <MapPin className="h-3.5 w-3.5 text-[#4cc253]" />
-                                <span className="truncate">{primaryRequest.zona}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center">
+                                  <MapPin className="h-3.5 w-3.5 text-[#4cc253]" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Zona</p>
+                                  <p className="truncate text-xs font-bold text-gray-800 mt-0.5">{primaryRequest.zona}</p>
+                                </div>
                               </div>
+                            )}
+
+                            {(primaryRequest.type?.toLowerCase().includes('turno pareja') || (primaryRequest as any).noveltyType?.toLowerCase().includes('turno pareja')) && (
+                              <>
+                                {(primaryRequest.comp_am || (primaryRequest as any).codeAM) && (
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+                                      <User className="h-3 w-3 text-[#4cc253]" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Pareja AM</p>
+                                      <p className="truncate text-xs font-bold text-gray-800 mt-0.5">{primaryRequest.comp_am || (primaryRequest as any).codeAM}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {(primaryRequest.comp_pm || (primaryRequest as any).codePM) && (
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+                                      <User className="h-3 w-3 text-[#4cc253]" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none">Pareja PM</p>
+                                      <p className="truncate text-xs font-bold text-gray-800 mt-0.5">{primaryRequest.comp_pm || (primaryRequest as any).codePM}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
-                        <div className="text-[10px] font-black font-mono text-green-400 bg-white px-2 py-1 rounded-lg border border-green-50 shadow-sm">
-                          ID:{primaryRequest.code}
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="text-[9px] font-black text-gray-400 bg-white px-2 py-1.5 rounded-lg border border-gray-100 shadow-sm uppercase tracking-tighter">
+                            ID:{primaryRequest.code}
+                          </div>
                         </div>
                       </div>
 
@@ -703,7 +793,7 @@ const RequestCard = memo(
                             variant="ghost"
                             size="sm"
                             onClick={(e) => { e.stopPropagation(); setShowDetailedView(true); }}
-                            className="h-9 px-5 text-[11px] font-bold text-green-700 hover:text-white hover:bg-[#4cc253] rounded-full transition-all border border-green-100 hover:border-[#4cc253] group/btn shadow-soft"
+                            className="h-10 px-6 text-[10px] font-black uppercase tracking-widest text-[#4cc253] hover:text-white hover:bg-[#4cc253] rounded-2xl transition-all border border-gray-100 hover:border-[#4cc253] group/btn shadow-sm"
                           >
                             Gestionar Solicitud
                             <ArrowRight className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:translate-x-1" />
@@ -715,21 +805,37 @@ const RequestCard = memo(
                 </Card>
               </ContextMenuTrigger>
 
-              <ContextMenuContent className="w-64 rounded-xl border border-green-100 bg-white/95 p-2 shadow-2xl backdrop-blur-lg">
-                <div className="px-3 py-2 text-[10px] font-black uppercase text-green-400 tracking-widest border-b border-green-50 mb-1.5 flex items-center justify-between">
-                  <span>Acciones</span>
-                  <Activity className="h-3 w-3" />
+              <ContextMenuContent className="w-80 rounded-[2rem] border border-gray-100 bg-white/95 p-3 shadow-2xl backdrop-blur-xl">
+                <div className="px-4 py-3 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-50 mb-2 flex items-center justify-between">
+                  <span>Acciones Disponibles</span>
+                  <Activity className="h-3 w-3 text-[#4cc253]" />
                 </div>
                 {requests.map((request) => (
                   <ContextMenuItem
                     key={request.id}
                     onClick={() => onDelete(request)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-green-950 font-bold outline-none transition-all hover:bg-green-50 hover:text-green-700 cursor-pointer"
+                    className="flex flex-col items-start gap-1 rounded-2xl px-4 py-3 outline-none transition-all hover:bg-red-50 group cursor-pointer"
                   >
-                    <div className="p-1.5 rounded-md bg-green-100 shadow-sm">
-                      <Trash2 className="h-4 w-4 text-green-600" />
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="p-2 rounded-xl bg-gray-50 text-gray-400 group-hover:bg-red-100 group-hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-gray-900 leading-none mb-1 group-hover:text-red-600 transition-colors">Eliminar {request.type}</p>
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                          <Calendar className="h-3 w-3" />
+                          <span>
+                            {request.dates
+                              ? Array.isArray(request.dates)
+                                ? request.dates.length > 1
+                                  ? `${formatDateForCard(request.dates[0])} - ${formatDateForCard(request.dates[request.dates.length - 1])}`
+                                  : formatDateForCard(request.dates[0])
+                                : formatDateForCard(request.dates.toString())
+                              : "Sin fecha"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <span>Eliminar {request.type}</span>
                   </ContextMenuItem>
                 ))}
               </ContextMenuContent>

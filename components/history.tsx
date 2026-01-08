@@ -41,6 +41,7 @@ interface HistoryItem {
   status: 'created' | 'approved' | 'rejected' | 'pending' | 'notified';
   description?: string;
   requestedDates?: string;
+  noveltyType?: string;
   createdAt: string;
 }
 
@@ -119,7 +120,7 @@ const HistorySection = React.memo(({ isLoading, error, history }: HistorySection
     };
   }, [history]);
 
-  // Datos para gráfico de pie
+  // Datos para gráfico de pie (Estado)
   const pieData = useMemo(() => {
     return [
       { name: 'Aprobadas', value: stats.approved, color: CORPORATE_GREEN },
@@ -127,6 +128,22 @@ const HistorySection = React.memo(({ isLoading, error, history }: HistorySection
       { name: 'Pendientes', value: stats.pending, color: '#f59e0b' },
     ].filter(item => item.value > 0);
   }, [stats]);
+
+  // Distribución por Tipo de Novedad
+  const typeDistribution = useMemo(() => {
+    const counts: { [key: string]: number } = {};
+    history.forEach(item => {
+      const type = item.noveltyType || 'Otro';
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: stats.total > 0 ? (value / stats.total * 100) : 0
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [history, stats.total]);
 
   // Tendencias mensuales simplificadas
   const monthlyTrends = useMemo(() => {
@@ -213,14 +230,43 @@ const HistorySection = React.memo(({ isLoading, error, history }: HistorySection
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Type Distribution Card */}
+        <Card className="lg:col-span-1 p-8">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="p-2 bg-gray-50 rounded-xl">
+              <Target className="w-5 h-5 text-[#4cc253]" />
+            </div>
+            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Tipos de Solicitud</h3>
+          </div>
+
+          <div className="space-y-6">
+            {typeDistribution.map((item, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-gray-500 truncate pr-4">{item.name}</span>
+                  <span className="text-gray-900">{item.value} <span className="text-gray-400 font-bold">({item.percentage.toFixed(0)}%)</span></span>
+                </div>
+                <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.percentage}%` }}
+                    transition={{ duration: 1, ease: "easeOut", delay: index * 0.1 }}
+                    className="h-full bg-[#4cc253] rounded-full shadow-[0_0_8px_rgba(76,194,83,0.3)]"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
         {/* Pie Chart Card */}
         <Card className="lg:col-span-1 p-8">
           <div className="flex items-center space-x-3 mb-8">
             <div className="p-2 bg-gray-50 rounded-xl">
               <PieChart className="w-5 h-5 text-[#4cc253]" />
             </div>
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Distribución</h3>
+            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Estado Final</h3>
           </div>
           <div className="h-48 relative">
             <ResponsiveContainer width="100%" height="100%">
