@@ -1081,15 +1081,16 @@ admin.get('/requests/user/:code/history', getCurrentUser, requireAdmin, async (c
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     // Crear historial detallado
-    const history = allRequests.map((request, index) => {
+    const history = allRequests.map((request) => {
       const baseHistory = [
         {
           id: `hist_${request.id}_created`,
           type: `Solicitud de ${request.request_type}`,
           createdAt: request.createdAt,
-          status: request.status, // Usar el estado real de la base de datos
+          status: request.status,
           description: `${request.type} - ${request.description || 'Sin descripción'}`,
           requestedDates: request.requestedDates,
+          noveltyType: request.type,
           requestId: request.id,
           requestType: request.request_type
         }
@@ -1104,6 +1105,7 @@ admin.get('/requests/user/:code/history', getCurrentUser, requireAdmin, async (c
           status: request.status,
           description: request.reason,
           requestedDates: request.requestedDates,
+          noveltyType: request.type,
           requestId: request.id,
           requestType: request.request_type
         });
