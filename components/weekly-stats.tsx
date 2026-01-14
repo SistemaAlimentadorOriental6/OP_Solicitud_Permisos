@@ -58,7 +58,6 @@ interface DayModalProps {
 
 const DayModal: React.FC<DayModalProps> = ({ isOpen, onClose, dayData }) => {
   const [filterType, setFilterType] = useState<string>("all")
-  const [activeTab, setActiveTab] = useState<"overview" | "details">("overview")
 
   const getTypeIcon = useCallback((type: string) => {
     const icons: Record<string, React.ReactNode> = {
@@ -78,13 +77,13 @@ const DayModal: React.FC<DayModalProps> = ({ isOpen, onClose, dayData }) => {
   const getStatusColor = useCallback((status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 border-amber-200 shadow-amber-100"
+        return "bg-[#fffbe6] text-[#b54708] border-[#fef0c7]"
       case "approved":
-        return "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-800 border-emerald-200 shadow-emerald-100"
+        return "bg-[#f0faf2] text-[#33b150] border-[#d1f2d9]"
       case "rejected":
-        return "bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-red-200 shadow-red-100"
+        return "bg-[#fff1f0] text-[#b42318] border-[#fee4e2]"
       default:
-        return "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-800 border-gray-200 shadow-gray-100"
+        return "bg-gray-50 text-gray-600 border-gray-100"
     }
   }, [])
 
@@ -116,15 +115,15 @@ const DayModal: React.FC<DayModalProps> = ({ isOpen, onClose, dayData }) => {
 
   const getTypeName = useCallback((type: string) => {
     const typeNames: Record<string, string> = {
-      descanso: "Descansos",
-      cita: "Citas médicas",
-      audiencia: "Audiencias",
-      licencia: "Licencias no remuneradas",
+      descanso: "Descanso",
+      cita: "Cita médica",
+      audiencia: "Audiencia",
+      licencia: "Licencia no remunerada",
       diaAM: "Día AM",
       diaPM: "Día PM",
-      "Turno pareja": "Turnos pareja",
-      "Tabla partida": "Tablas partidas",
-      "Disponible fijo": "Disponibles fijos",
+      "Turno pareja": "Turno pareja",
+      "Tabla partida": "Tabla partida",
+      "Disponible fijo": "Disponible fijo",
     }
     return typeNames[type] || type
   }, [])
@@ -187,406 +186,106 @@ const DayModal: React.FC<DayModalProps> = ({ isOpen, onClose, dayData }) => {
             className="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden border border-white/20"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header Simplificado */}
-            <div className="relative bg-gradient-to-r from-[#4cc253] to-emerald-600 p-6 text-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <Calendar className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">
-                      {format(dayData.date, "EEEE", { locale: es }).charAt(0).toUpperCase() + format(dayData.date, "EEEE", { locale: es }).slice(1)}
-                    </h2>
-                    <p className="text-white/80 text-sm font-medium">
-                      {format(dayData.date, "d 'de' MMMM 'de' yyyy", { locale: es })}
-                    </p>
-                    <div className="flex items-center space-x-3 mt-2">
-                      <div className="flex items-center space-x-1.5 text-xs bg-white/20 rounded-full px-3 py-1">
-                        <BarChart3 className="h-3.5 w-3.5" />
-                        <span className="font-semibold">{dayData.count} Solicitudes</span>
-                      </div>
-                      <div className="flex items-center space-x-1.5 text-xs bg-white/20 rounded-full px-3 py-1">
-                        <Star className="h-3.5 w-3.5" />
-                        <span className="font-semibold">{uniqueTypes.length} Tipos</span>
-                      </div>
-                    </div>
-                  </div>
+            <div className="p-8">
+              {/* Header Info */}
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 leading-tight">
+                    {format(dayData.date, "EEEE", { locale: es }).charAt(0).toUpperCase() + format(dayData.date, "EEEE", { locale: es }).slice(1)}
+                  </h2>
+                  <p className="text-[#33b150] font-bold text-lg">
+                    {format(dayData.date, "d 'de' MMMM, yyyy", { locale: es })}
+                  </p>
                 </div>
-
-                <button
-                  onClick={onClose}
-                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200"
-                >
-                  <X className="h-5 w-5 text-white" />
-                </button>
-              </div>
-            </div>
-
-
-            <div className="p-6 overflow-y-auto max-h-[calc(95vh-180px)]">
-              {/* Stats Cards Simplificadas */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <Card className="bg-emerald-50 border-emerald-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-emerald-600 uppercase">Total</p>
-                        <p className="text-2xl font-bold text-emerald-800">{dayData.count}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-                        <BarChart3 className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-green-50 border-green-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-green-600 uppercase">Aprobadas</p>
-                        <p className="text-2xl font-bold text-green-800">{statusCounts.approved}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-amber-50 border-amber-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-amber-600 uppercase">Pendientes</p>
-                        <p className="text-2xl font-bold text-amber-800">{statusCounts.pending}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
-                        <AlertCircle className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-red-50 border-red-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-red-600 uppercase">Rechazadas</p>
-                        <p className="text-2xl font-bold text-red-800">{statusCounts.rejected}</p>
-                      </div>
-                      <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
-                        <XCircle className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="bg-[#f0faf2] border border-[#d1f2d9] rounded-2xl px-6 py-3">
+                  <span className="text-2xl font-black text-[#33b150]">{dayData.count}</span>
+                  <span className="ml-2 text-sm font-bold text-[#33b150] uppercase tracking-wider">Solicitudes</span>
+                </div>
               </div>
 
-              {/* Tabs Simplificados */}
-              <div className="flex space-x-2 mb-6 bg-gray-100 p-1.5 rounded-xl">
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all flex items-center justify-center space-x-2 text-sm ${activeTab === "overview"
-                    ? "bg-white text-[#4cc253] shadow-sm"
-                    : "text-gray-600 hover:text-[#4cc253]"
-                    }`}
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  <span>Resumen</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("details")}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all flex items-center justify-center space-x-2 text-sm ${activeTab === "details"
-                    ? "bg-white text-[#4cc253] shadow-sm"
-                    : "text-gray-600 hover:text-[#4cc253]"
-                    }`}
-                >
-                  <Eye className="h-4 w-4" />
-                  <span>Detalles</span>
-                </button>
+              {/* Filter Controls Simplified with Counts Above */}
+              <div className="flex flex-wrap gap-x-4 gap-y-6 mb-8">
+                <div className="flex flex-col items-center">
+                  <span className={`text-xs font-black mb-1 transition-colors ${filterType === "all" ? "text-[#33b150]" : "text-gray-300"}`}>
+                    {dayData.count}
+                  </span>
+                  <button
+                    onClick={() => setFilterType("all")}
+                    className={`px-5 py-2 rounded-xl text-sm font-black transition-all ${filterType === "all"
+                      ? "bg-[#33b150] text-white shadow-lg shadow-emerald-500/20"
+                      : "bg-white border-2 border-gray-100 text-gray-400 hover:border-emerald-200"
+                      }`}
+                  >
+                    Todas
+                  </button>
+                </div>
+                {uniqueTypes.map(type => (
+                  <div key={type} className="flex flex-col items-center">
+                    <span className={`text-xs font-black mb-1 transition-colors ${filterType === type ? "text-[#33b150]" : "text-gray-300"}`}>
+                      {typeStats[type]?.count || 0}
+                    </span>
+                    <button
+                      onClick={() => setFilterType(type)}
+                      className={`px-5 py-2 rounded-xl text-sm font-black transition-all ${filterType === type
+                        ? "bg-[#33b150] text-white shadow-lg shadow-emerald-500/20"
+                        : "bg-white border-2 border-gray-100 text-gray-400 hover:border-emerald-200"
+                        }`}
+                    >
+                      {getTypeName(type)}
+                    </button>
+                  </div>
+                ))}
               </div>
 
               {/* Tab Content */}
-              <AnimatePresence mode="wait">
-                {activeTab === "overview" && (
+              {/* Requests List */}
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                {filteredRequests.map((request, index) => (
                   <motion.div
-                    key="overview"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.3 }}
+                    key={request.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="group bg-white rounded-2xl p-6 border border-gray-100 hover:border-[#33b150]/30 hover:bg-[#f0faf2]/30 transition-all duration-300"
                   >
-                    {/* Type Statistics */}
-                    <Card className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
-                      <CardHeader className="pb-4">
-                        <CardTitle className="flex items-center space-x-3 text-2xl">
-                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
-                            <Award className="h-6 w-6 text-white" />
-                          </div>
-                          <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
-                            Estadísticas por Tipo
-                          </span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {Object.entries(typeStats).map(([type, stats], index) => (
-                            <motion.div
-                              key={type}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                              className="group relative bg-white rounded-[2rem] border border-gray-100 p-6 shadow-[0_2px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden"
-                            >
-                              {/* Background subtle decoration */}
-                              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-100/50 transition-colors duration-500" />
-
-                              <div className="relative flex items-center gap-4 mb-6">
-                                <div className="h-14 w-14 bg-emerald-50 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-500">
-                                  {React.cloneElement(getTypeIcon(type) as React.ReactElement, {
-                                    className: "h-7 w-7 text-[#4cc253]",
-                                  })}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-lg font-black text-gray-900 truncate leading-tight">
-                                    {getTypeName(type)}
-                                  </h4>
-                                  <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mt-0.5">
-                                    {stats.count} solicitudes totales
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="relative space-y-3">
-                                {/* Status rows - cleaner and more elegant */}
-                                <div className="flex items-center justify-between px-3 py-2 bg-emerald-50/50 rounded-xl group-hover:bg-emerald-50 transition-colors">
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-4 w-4 text-[#4cc253]" />
-                                    <span className="text-xs font-bold text-emerald-800">Aprobadas</span>
-                                  </div>
-                                  <span className="text-sm font-black text-emerald-900">{stats.approved}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between px-3 py-2 bg-amber-50/50 rounded-xl group-hover:bg-amber-50 transition-colors">
-                                  <div className="flex items-center gap-2">
-                                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                                    <span className="text-xs font-bold text-amber-800">Pendientes</span>
-                                  </div>
-                                  <span className="text-sm font-black text-amber-900">{stats.pending}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between px-3 py-2 bg-red-50/50 rounded-xl group-hover:bg-red-50 transition-colors">
-                                  <div className="flex items-center gap-2">
-                                    <XCircle className="h-4 w-4 text-red-500" />
-                                    <span className="text-xs font-bold text-red-800">Rechazadas</span>
-                                  </div>
-                                  <span className="text-sm font-black text-red-900">{stats.rejected}</span>
-                                </div>
-                              </div>
-
-                              {/* Simple visual indicator (mini progress bar) */}
-                              <div className="mt-5 h-1.5 w-full bg-gray-50 rounded-full overflow-hidden flex">
-                                {stats.approved > 0 && (
-                                  <div
-                                    style={{ width: `${(stats.approved / stats.count) * 100}%` }}
-                                    className="h-full bg-[#4cc253]"
-                                  />
-                                )}
-                                {stats.pending > 0 && (
-                                  <div
-                                    style={{ width: `${(stats.pending / stats.count) * 100}%` }}
-                                    className="h-full bg-amber-400"
-                                  />
-                                )}
-                                {stats.rejected > 0 && (
-                                  <div
-                                    style={{ width: `${(stats.rejected / stats.count) * 100}%` }}
-                                    className="h-full bg-red-400"
-                                  />
-                                )}
-                              </div>
-                            </motion.div>
-                          ))}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-[#f0faf2] rounded-xl flex items-center justify-center text-[#33b150]">
+                          {getTypeIcon(request.type)}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-
-                {activeTab === "details" && (
-                  <motion.div
-                    key="details"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {/* Filter Controls */}
-                    <div className="flex flex-wrap items-center justify-between mb-6 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-200">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                          <Filter className="h-5 w-5 text-white" />
+                        <div>
+                          <h4 className="text-lg font-black text-gray-900">{request.name.toUpperCase()}</h4>
+                          <p className="text-xs font-bold text-gray-400 tracking-wider">
+                            CÓDIGO: {request.code || request.codeAM || request.codePM || '---'} • {getTypeName(request.type)}
+                          </p>
                         </div>
-                        <span className="text-lg font-semibold text-gray-800">Filtrar por tipo:</span>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-3 md:mt-0">
-                        <Button
-                          variant={filterType === "all" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilterType("all")}
-                          className={`rounded-xl font-semibold transition-all duration-300 ${filterType === "all"
-                            ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg"
-                            : "hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
-                            }`}
-                        >
-                          <Zap className="h-4 w-4 mr-2" />
-                          Todos ({dayData.count})
-                        </Button>
-                        {uniqueTypes.map(type => (
-                          <Button
-                            key={type}
-                            variant={filterType === type ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setFilterType(type)}
-                            className={`rounded-xl font-semibold transition-all duration-300 ${filterType === type
-                              ? "bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg"
-                              : "hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700"
-                              }`}
-                          >
-                            {React.cloneElement(getTypeIcon(type) as React.ReactElement, {
-                              className: "h-4 w-4 mr-2",
-                            })}
-                            {getTypeName(type)} ({typeStats[type]?.count || 0})
-                          </Button>
-                        ))}
+                      <div className="text-right">
+                        <div className={`text-[10px] font-black px-3 py-1 rounded-full border-2 uppercase tracking-tighter ${request.status === 'approved' ? 'bg-[#f0faf2] text-[#33b150] border-[#d1f2d9]' : 'bg-gray-50 text-gray-400 border-gray-100'}`}>
+                          {getStatusText(request.status)}
+                        </div>
                       </div>
                     </div>
-
-                    {/* Requests List */}
-                    <Card className="bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-xl">
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-3 text-2xl">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                            <FileText className="h-6 w-6 text-white" />
-                          </div>
-                          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                            Solicitudes ({filteredRequests.length})
-                          </span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                          {filteredRequests.map((request, index) => (
-                            <motion.div
-                              key={request.id}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="p-6 rounded-2xl border border-gray-200 hover:border-emerald-300 bg-gradient-to-br from-white to-gray-50 hover:from-emerald-50 hover:to-green-50 transition-all duration-300 group shadow-lg hover:shadow-xl"
-                            >
-                              <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center space-x-4">
-                                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                    {React.cloneElement(getTypeIcon(request.type) as React.ReactElement, {
-                                      className: "h-7 w-7 text-white",
-                                    })}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-bold text-gray-900 text-lg">{request.name}</h4>
-                                    <p className="text-sm text-gray-600 font-medium">Código: {request.code}</p>
-                                  </div>
-                                </div>
-                                <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl border shadow-sm ${getStatusColor(request.status)}`}>
-                                  {getStatusIcon(request.status)}
-                                  <span className="font-bold text-sm">{getStatusText(request.status)}</span>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div className="space-y-2">
-                                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo de Solicitud</p>
-                                  <div className="flex items-center space-x-2">
-                                    {React.cloneElement(getTypeIcon(request.type) as React.ReactElement, {
-                                      className: "h-4 w-4 text-emerald-600",
-                                    })}
-                                    <p className="text-sm font-semibold text-gray-800">{getTypeName(request.type)}</p>
-                                  </div>
-                                </div>
-                                {request.dates && (
-                                  <div className="space-y-2">
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Fechas Solicitadas</p>
-                                    <p className="text-sm text-gray-700 font-medium">
-                                      {typeof request.dates === 'string'
-                                        ? request.dates.split(',').length > 1
-                                          ? `${request.dates.split(',').length} fechas seleccionadas`
-                                          : request.dates
-                                        : Array.isArray(request.dates)
-                                          ? `${request.dates.length} fechas seleccionadas`
-                                          : 'No especificado'
-                                      }
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-
-                              {request.description && (
-                                <div className="pt-4 border-t border-gray-200">
-                                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Descripción</p>
-                                  <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-xl">{request.description}</p>
-                                </div>
-                              )}
-                            </motion.div>
-                          ))}
-
-                          {filteredRequests.length === 0 && (
-                            <div className="text-center py-12">
-                              <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <FileText className="h-10 w-10 text-gray-400" />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-600 mb-2">No hay solicitudes</h3>
-                              <p className="text-gray-500">No se encontraron solicitudes para los filtros seleccionados</p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
                   </motion.div>
+                ))}
+
+                {filteredRequests.length === 0 && (
+                  <div className="text-center py-20">
+                    <p className="text-gray-400 font-bold">No hay solicitudes para mostrar</p>
+                  </div>
                 )}
-              </AnimatePresence>
+              </div>
             </div>
 
-            {/* Premium Footer */}
-            <div className="border-t border-gray-200 p-6 bg-gradient-to-r from-gray-50 to-white">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Eye className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      Mostrando {filteredRequests.length} de {dayData.count} solicitudes
-                    </span>
-                  </div>
-                  <div className="h-4 w-px bg-gray-300" />
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      {format(dayData.date, "EEEE, d 'de' MMMM", { locale: es })}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex space-x-3">
-                  <Button variant="outline" size="sm" className="rounded-xl font-semibold hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all duration-300">
-                    <Download className="h-4 w-4 mr-2" />
-                    Exportar
-                  </Button>
-                  <Button
-                    onClick={onClose}
-                    className="rounded-xl font-semibold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg transition-all duration-300"
-                  >
-                    Cerrar
-                  </Button>
-                </div>
+            {/* Simple Footer */}
+            <div className="border-t border-gray-50 p-6 bg-white">
+              <div className="flex justify-end">
+                <button
+                  onClick={onClose}
+                  className="px-10 py-3 rounded-xl font-black bg-[#33b150] hover:bg-[#2d9e47] text-white shadow-lg transition-all"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </motion.div>
@@ -734,6 +433,15 @@ const WeeklyStats = React.memo(({ requests }: WeeklyStatsProps) => {
   }, [weeklyData])
 
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0)
+  const [selectedDay, setSelectedDay] = useState<typeof allDaysData[0] | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleDayClick = useCallback((day: typeof allDaysData[0]) => {
+    if (day.count > 0) {
+      setSelectedDay(day)
+      setIsModalOpen(true)
+    }
+  }, [])
 
   // Default to Showing Today's week
   useEffect(() => {
@@ -823,7 +531,10 @@ const WeeklyStats = React.memo(({ requests }: WeeklyStatsProps) => {
                     )}
 
                     {/* Unified Bar Container */}
-                    <div className="relative w-full md:w-16 h-full bg-gray-50 rounded-xl overflow-hidden group-hover:bg-gray-100 transition-colors">
+                    <div
+                      onClick={() => handleDayClick(day)}
+                      className={`relative w-full md:w-16 h-full bg-gray-50 rounded-xl overflow-hidden group-hover:bg-gray-100 transition-colors ${count > 0 ? 'cursor-pointer hover:ring-2 hover:ring-[#4cc253]/30' : ''}`}
+                    >
                       {/* Active Fill */}
                       {count > 0 && (
                         <div
@@ -848,6 +559,12 @@ const WeeklyStats = React.memo(({ requests }: WeeklyStatsProps) => {
           </div>
         </div>
       </Card>
+
+      <DayModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        dayData={selectedDay}
+      />
     </div>
 
 
