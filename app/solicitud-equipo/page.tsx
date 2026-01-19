@@ -27,7 +27,8 @@ import {
   Sunrise,
   Sunset,
   Shield,
-  Phone
+  Phone,
+  AlertCircle
 } from "lucide-react"
 
 // Hooks
@@ -42,6 +43,8 @@ interface UserInterface {
 }
 
 export default function EquipmentRequestForm() {
+  const POSTULACIONES_CERRADAS = true; // Cambiar a false para abrir las postulaciones
+
   const router = useRouter()
   const { userData, isLoading: isLoadingUser } = useUserData()
 
@@ -253,6 +256,38 @@ export default function EquipmentRequestForm() {
         <AnimatePresence>
           {submitState.isSubmitting && <LoadingOverlay />}
         </AnimatePresence>
+
+        {POSTULACIONES_CERRADAS && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-[32px] p-8 sm:p-10 shadow-xl shadow-red-100/50 border border-red-50 relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
+          >
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+              <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center text-red-500 flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
+                <AlertCircle className="h-10 w-10 animate-pulse" />
+              </div>
+              <div className="text-center md:text-left space-y-2">
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
+                  Postulaciones <span className="text-red-500 italic">Cerradas</span>
+                </h2>
+                <p className="text-gray-500 font-medium leading-relaxed max-w-xl">
+                  En este momento el proceso de postulaciones ha finalizado y <span className="font-bold text-gray-900">ya no se reciben más solicitudes</span>. Agradecemos mucho tu interés en participar.
+                </p>
+              </div>
+              <div className="md:ml-auto">
+                <Button
+                  onClick={() => router.push('/')}
+                  variant="outline"
+                  className="rounded-2xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 hover:text-red-500 font-black uppercase tracking-widest text-[10px] h-12 px-8 transition-all active:scale-95"
+                >
+                  Regresar
+                </Button>
+              </div>
+            </div>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-red-50/50 rounded-full blur-3xl group-hover:bg-red-100/50 transition-colors" />
+          </motion.div>
+        )}
 
         {/* Banner de Bienvenida Premium */}
         <motion.div
@@ -470,29 +505,30 @@ export default function EquipmentRequestForm() {
               </div>
             </div>
 
-            {/* Botón de Envío Premium */}
-            <motion.div
-              className="pt-6"
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Button
-                type="submit"
-                disabled={submitState.isSubmitting || !selectedType}
-                className="w-full h-16 bg-gray-900 hover:bg-black text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-gray-200 transition-all flex items-center justify-center gap-3"
+            {!POSTULACIONES_CERRADAS && (
+              <motion.div
+                className="pt-6"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
-                {submitState.isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Enviando Solicitud...
-                  </>
-                ) : (
-                  <>
-                    Enviar Solicitud <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </motion.div>
+                <Button
+                  type="submit"
+                  disabled={submitState.isSubmitting || !selectedType}
+                  className="w-full h-16 bg-gray-900 hover:bg-black text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-gray-200 transition-all flex items-center justify-center gap-3"
+                >
+                  {submitState.isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Enviando Solicitud...
+                    </>
+                  ) : (
+                    <>
+                      Enviar Solicitud <ChevronRight className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
           </form>
         </motion.div>
       </main>

@@ -14,6 +14,7 @@ import {
   AlertCircle,
   X,
   Search,
+  Clock,
 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
@@ -60,6 +61,7 @@ export default function SolicitudPermisosPage() {
   const [noveltyType, setNoveltyType] = useState<string>("")
   const [hasNewNotification, setHasNewNotification] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [time, setTime] = useState("")
 
   // Estados de UI
   const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false)
@@ -203,6 +205,7 @@ export default function SolicitudPermisosPage() {
     formData.append("dates", JSON.stringify(selectedDates))
     formData.append("description", description)
     formData.append("noveltyType", noveltyType)
+    formData.append("time", time)
 
     selectedFiles.forEach((fileInfo) => {
       formData.append("files", fileInfo.file)
@@ -217,6 +220,7 @@ export default function SolicitudPermisosPage() {
       setSelectedDates([])
       setDescription("")
       setSelectedFiles([])
+      setTime("")
 
       // Refrescar permisos
       await fetchPermits()
@@ -348,6 +352,37 @@ export default function SolicitudPermisosPage() {
             <ChevronRight className="h-5 w-5 text-[#4cc253]/60 group-hover:text-[#4cc253] transition-colors" />
           </button>
         </motion.div>
+
+        {/* Campo de Hora (Condicional) */}
+        <AnimatePresence>
+          {(noveltyType === "cita" || noveltyType === "audiencia") && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 24 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              className="overflow-hidden bg-white rounded-3xl p-6 border border-gray-100 shadow-sm"
+            >
+              <h3 className="text-xs uppercase font-black text-gray-400 tracking-[0.2em] mb-3">
+                Hora de la {noveltyType === "cita" ? "Cita" : "Audiencia"} <span className="text-red-500">*</span>
+              </h3>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  required
+                  className="w-full h-14 p-4 pl-12 rounded-2xl border border-gray-100 bg-gray-50 focus:border-[#4cc253] focus:ring-2 focus:ring-[#4cc253]/20 transition-all font-bold text-gray-900"
+                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                  <Clock className="h-5 w-5 text-[#4cc253]" />
+                </div>
+              </div>
+              <p className="mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                Indique la hora programada para su {noveltyType === "cita" ? "cita médica" : "audiencia"}.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Calendario de Fechas */}
         <motion.div

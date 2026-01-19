@@ -22,6 +22,8 @@ interface User {
 }
 
 export default function EquipmentRequestForm() {
+  const POSTULACIONES_CERRADAS = true; // Cambiar a false para abrir las postulaciones
+
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -213,6 +215,67 @@ export default function EquipmentRequestForm() {
             </Button>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (POSTULACIONES_CERRADAS) {
+    return (
+      <div className="min-h-screen via-white to-green-200 flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-green-50/50 via-white to-emerald-50/50">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-2xl bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/40 overflow-hidden relative z-10 p-12 md:p-16 text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+            className="bg-gradient-to-tr from-green-100 to-emerald-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl border border-white/50"
+          >
+            <AlertCircle className="h-12 w-12 text-green-600" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-800 to-emerald-800 mb-6"
+          >
+            Postulaciones Cerradas
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-green-700/80 text-xl leading-relaxed mb-10 max-w-md mx-auto"
+          >
+            Agradecemos mucho tu interés. En este momento el proceso de postulaciones ha finalizado y ya no se reciben más solicitudes.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Button
+              onClick={() => router.push('/')}
+              className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 rounded-2xl text-lg font-bold transition-all hover:scale-105 shadow-lg hover:shadow-green-200/50 active:scale-95"
+            >
+              Volver al Inicio
+            </Button>
+          </motion.div>
+
+          <footer className="mt-12 text-green-600/50 text-sm font-medium">
+            Sistema Alimentador Oriental 6
+          </footer>
+        </motion.div>
+
+        {/* Elementos decorativos de fondo */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-200/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-200/20 rounded-full blur-[120px] pointer-events-none" />
       </div>
     )
   }
