@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, FileText, Briefcase, List, User, Monitor } from "lucide-react"
+import { Home, FileText, Briefcase, List, User, Monitor, BookOpen } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import useUserData from "@/app/hooks/useUserData"
 
@@ -35,6 +35,11 @@ export default function BottomNavigation({ hasNewNotification = false, showProfi
         icon: FileText,
         label: "Permisos",
         href: "/solicitud-permisos",
+      },
+      {
+        icon: BookOpen,
+        label: "Reglamento",
+        href: "/reglamento",
       },
     ]
 
